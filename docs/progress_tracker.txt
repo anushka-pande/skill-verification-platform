@@ -1,0 +1,29 @@
+Core Backend (Strong)
+    Authentication (Register/Login)
+    PostgreSQL (Users)
+    MongoDB (Tasks + Submissions)
+    Task creation + retrieval
+    Code submission storage
+    Execution engine (subprocess)
+    Timeout protection
+    Runtime error handling
+    Test-case evaluation loop
+    Multi-factor scoring:
+        Execution score
+        Quality score (AST)
+        Time score
+        Final weighted score
+    Results stored in DB
+
+
+
+Frontend (Very Strong for MVP)
+
+    Auth UI (Login/Register)
+    Dashboard (Tasks list)
+    Editor page (Monaco)
+    Submit → Execute → Score flow
+    Split-screen layout (LeetCode style)
+    Loading state
+    Result display
+    Navbar

@@ -39,8 +39,9 @@ def execute_submission(submission_id: str):
         test_input = test["input"]
         expected_output = test["output"]
 
-        execution_result = execute_python(code, test_input)
-
+        function_name = task.get("function_name", "main")
+        execution_result = execute_python(code, test_input, function_name)
+        
         execution_time = execution_result.get("execution_time", 0)
         error = execution_result.get("error")
 
@@ -76,7 +77,6 @@ def execute_submission(submission_id: str):
     quality_score = 100 
     
     # Penalize long code 
-    
     if analysis["line_count"] > 50: 
         quality_score -= 10 
         

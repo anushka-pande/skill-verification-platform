@@ -1,119 +1,400 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState, useEffect } from "react"
+import axios from "axios"
+import Editor from "@monaco-editor/react"
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [isLogin, setIsLogin] = useState(true)
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [page, setPage] = useState("auth")
+  const [tasks, setTasks] = useState([])
+  const [selectedTask, setSelectedTask] = useState(null)
+  const [code, setCode] = useState("")
+  const [result, setResult] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
+
+  const handleSubmit = async () => {
+    try {
+      if (isLogin) {
+
+        await axios.post("http://127.0.0.1:8000/login", {
+          email,
+          password
+        })
+
+        localStorage.setItem("user", email)
+
+        // Clear fields
+        setEmail("")
+        setPassword("")
+
+        // Smooth redirect
+        setPage("dashboard")
+        setProfileOpen(false)
+
+      } else {
+
+        await axios.post("http://127.0.0.1:8000/register", {
+          name,
+          email,
+          password
+        })
+
+        // Auto switch to login after register
+        setIsLogin(true)
+
+        // Clear fields
+        setName("")
+        setEmail("")
+        setPassword("")
+      }
+
+    } catch (error) {
+      // Keep error message but cleaner
+      const message =
+        error.response?.data?.detail || "Invalid credentials"
+
+      alert(message)
+    }
+  }
+
+  useEffect(() => {
+    if (page === "dashboard") {
+      axios.get("http://127.0.0.1:8000/tasks")
+        .then(res => setTasks(res.data))
+        .catch(err => console.error(err))
+    }
+  }, [page])
 
   return (
     <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      {page === "auth" && (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+          <div className="bg-slate-800/70 backdrop-blur-md p-10 rounded-2xl shadow-2xl w-[400px]">
+            
+            <h1 className="text-3xl font-bold text-center bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+              Skill Verification Platform
+            </h1>
 
-      <div className="ticks"></div>
+            <p className="text-slate-400 text-center mt-2 mb-6">
+              {isLogin ? "Login to continue" : "Create your account"}
+            </p>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+            <div className="space-y-4">
+              {!isLogin && (
+                <input
+                  type="text"
+                  placeholder="Full Name"
+                  className="w-full p-3 rounded-lg bg-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              )}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
+              <input
+                type="email"
+                placeholder="Email"
+                className="w-full p-3 rounded-lg bg-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+
+              <input
+                type="password"
+                placeholder="Password"
+                className="w-full p-3 rounded-lg bg-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+
+              <button
+                onClick={handleSubmit}
+                className="w-full p-3 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:opacity-90 transition text-white font-semibold"
+              >
+                {isLogin ? "Login" : "Register"}
+              </button>
+            </div>
+
+            <div className="text-center mt-6 text-slate-400 text-sm">
+              {isLogin ? "Don't have an account?" : "Already have an account?"}
+              <button
+                onClick={() => setIsLogin(!isLogin)}
+                className="ml-2 text-purple-400 hover:underline"
+              >
+                {isLogin ? "Register" : "Login"}
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {page === "dashboard" && (
+        <div className="min-h-screen bg-slate-900 p-10">
+          <div className="flex justify-between items-center mb-8 border-b border-slate-700 pb-4">
+            <h1 className="text-2xl font-bold text-purple-400">
+              Provenix
+            </h1>
+
+            <div className="relative">
+
+              <button
+                onClick={() => setProfileOpen(!profileOpen)}
+                className="bg-slate-800 px-4 py-2 rounded-lg hover:bg-slate-700 flex items-center gap-2"
+              >
+                Profile ▼
+              </button>
+
+              {profileOpen && (
+                <div className="absolute right-0 mt-2 w-40 bg-slate-800 rounded-lg shadow-lg border border-slate-700 z-50">
+
+                  <button
+                    onClick={() => {
+                      setPage("profile")
+                      setProfileOpen(false)
+                    }}
+                    className="block w-full text-left px-4 py-2 hover:bg-slate-700"
+                  >
+                    My Profile
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setPage("settings")
+                      setProfileOpen(false)
+                    }}
+                    className="block w-full text-left px-4 py-2 hover:bg-slate-700"
+                  >
+                    Settings
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem("user")
+                      setPage("auth")
+                      setProfileOpen(false)
+                    }}
+                    className="block w-full text-left px-4 py-2 text-red-400 hover:bg-slate-700"
+                  >
+                    Logout
+                  </button>
+
+                </div>
+              )}
+
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {tasks.map((task, index) => (
+              <div
+                key={index}
+                className="bg-slate-800 p-6 rounded-xl shadow-lg hover:scale-105 transition"
+              >
+                <h2 className="text-xl font-semibold">{task.title}</h2>
+
+                <span className="inline-block px-3 py-1 text-xs rounded-full bg-green-500/20 text-green-400">
+                  {task.difficulty}
+                </span>
+
+                <p className="text-slate-400">
+                  Skill: {task.skill}
+                </p>
+
+                <button
+                  onClick={() => {
+                    setSelectedTask(task)
+                    setPage("editor")
+                  }}
+                  className="mt-4 bg-purple-500 px-4 py-2 rounded-lg hover:bg-purple-600"
+                >
+                  Solve
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {page === "editor" && selectedTask && (
+        <div className="min-h-screen bg-slate-900 text-white flex">
+
+          {/* LEFT PANEL — Problem */}
+          <div className="w-1/2 p-8 border-r border-slate-800 overflow-y-auto">
+
+            {/* Navbar */}
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-xl font-bold text-purple-400">
+                Provenix
+              </h1>
+
+              <span className="text-slate-400">
+                {localStorage.getItem("user")}
+              </span>
+            </div>
+
+            <button
+              onClick={() => {
+                setResult(null)
+                setPage("dashboard")
+              }}
+              className="mb-6 bg-slate-700 px-4 py-2 rounded-lg hover:bg-slate-600"
+            >
+              ← Back
+            </button>
+
+            <h1 className="text-3xl font-bold text-purple-400">
+              {selectedTask.title}
+            </h1>
+
+            <p className="mt-4 text-slate-400">
+              Difficulty: {selectedTask.difficulty}
+            </p>
+
+            <div className="mt-6 bg-slate-800 p-6 rounded-xl">
+              <p className="mt-6 text-slate-400">
+                Read input from standard input and print the result.
+              </p>
+            </div>
+
+          </div>
+
+
+          {/* RIGHT PANEL — Editor */}
+          <div className="w-1/2 p-6 flex flex-col">
+
+            <Editor
+              height="60%"
+              theme="vs-dark"
+              defaultLanguage="python"
+              value={code}
+              onChange={(value) => setCode(value)}
+            />
+
+            <button
+              onClick={async () => {
+                try {
+                  setLoading(true)
+
+                  const submitRes = await axios.post(
+                    "http://127.0.0.1:8000/submit-code",
+                    {
+                      user_id: 1,
+                      task_id: selectedTask.title,
+                      code: code
+                    }
+                  )
+
+                  const submissionId = submitRes.data.submission_id
+
+                  const execRes = await axios.post(
+                    `http://127.0.0.1:8000/execute/${submissionId}`
+                  )
+
+                  setResult(execRes.data)
+
+                } catch {
+                  alert("Submission failed")
+                } finally {
+                  setLoading(false)
+                }
+              }}
+              className="mt-4 bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg transition"
+            >
+              {loading ? "Evaluating..." : "Run Code"}
+            </button>
+
+            {result && (
+              <div className="mt-6 bg-slate-800 p-6 rounded-xl">
+
+                <h2 className="text-green-400 text-3xl font-bold mb-4">
+                  Score: {result.final_score}
+                </h2>
+
+                <div className="grid grid-cols-2 gap-4 text-slate-300 text-sm">
+                  <p>Execution:</p>
+                  <p>{result.execution_score}</p>
+
+                  <p>Quality:</p>
+                  <p>{result.quality_score}</p>
+
+                  <p>Time:</p>
+                  <p>{result.time_score}</p>
+                </div>
+
+              </div>
+            )}
+
+          </div>
+
+        </div>
+      )}
+
+      {page === "profile" && (
+        <div className="min-h-screen bg-slate-900 p-10 text-white">
+
+          {/* Top Bar */}
+          <div className="flex items-center gap-4 mb-8">
+            <button
+              onClick={() => setPage("dashboard")}
+              className="bg-slate-700 px-4 py-2 rounded-lg hover:bg-slate-600"
+            >
+              ← Back
+            </button>
+
+            <h1 className="text-2xl font-bold text-purple-400">
+              My Profile
+            </h1>
+          </div>
+
+          {/* Content */}
+          <div className="bg-slate-800 p-6 rounded-xl w-[400px]">
+
+            <p className="text-slate-300">
+              Email: {localStorage.getItem("user")}
+            </p>
+
+            <p className="mt-4 text-slate-400">
+              Total Submissions: Coming Soon
+            </p>
+
+            <p className="text-slate-400">
+              Average Score: Coming Soon
+            </p>
+
+          </div>
+
+        </div>
+      )}
+
+      {page === "settings" && (
+        <div className="min-h-screen bg-slate-900 p-10 text-white">
+
+          {/* Top Bar */}
+          <div className="flex items-center gap-4 mb-8">
+            <button
+              onClick={() => setPage("dashboard")}
+              className="bg-slate-700 px-4 py-2 rounded-lg hover:bg-slate-600"
+            >
+              ← Back
+            </button>
+
+            <h1 className="text-2xl font-bold text-purple-400">
+              Settings
+            </h1>
+          </div>
+
+          {/* Content */}
+          <div className="bg-slate-800 p-6 rounded-xl w-[400px]">
+            <p className="text-slate-400">
+              Settings coming soon...
+            </p>
+          </div>
+
+        </div>
+      )}
     </>
   )
 }
