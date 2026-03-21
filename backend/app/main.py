@@ -1,9 +1,16 @@
 from fastapi import FastAPI
-from app.routes import auth
+from app.routes import auth, tasks, submissions, execute
+from app.database import engine
+from app.models import User
 
 app = FastAPI()
 
+User.metadata.create_all(bind=engine)
+
 app.include_router(auth.router)
+app.include_router(tasks.router)
+app.include_router(submissions.router)
+app.include_router(execute.router)
 
 @app.get("/")
 def home():
