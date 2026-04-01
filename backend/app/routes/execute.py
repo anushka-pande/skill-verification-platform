@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException 
 from app.mongo import submissions_collection, tasks_collection 
-from app.executor import execute_python 
+from app.executor import execute_code 
 from app.analyzer import analyze_code 
 from bson import ObjectId 
 
@@ -39,8 +39,8 @@ def execute_submission(submission_id: str):
         test_input = test["input"]
         expected_output = test["output"]
 
-        function_name = task.get("function_name", "main")
-        execution_result = execute_python(code, test_input, function_name)
+        language = submission.get("language", "python")
+        execution_result = execute_code(code, test_input, language)
         
         execution_time = execution_result.get("execution_time", 0)
         error = execution_result.get("error")
@@ -69,11 +69,15 @@ def execute_submission(submission_id: str):
             "actual": actual_output,
             "execution_time": execution_time,
             "status": status
-        }) 
+        })
         
     execution_score = (passed / total) * 100 if total > 0 else 0 
     
-    analysis = analyze_code(code) 
+    language = submission.get("language", "python")
+    if language == "python":
+        analysis = analyze_code(code) 
+    else:
+        analysis = {"line_count": len(code.splitlines()), "loop_count": 0}
     quality_score = 100 
     
     # Penalize long code 

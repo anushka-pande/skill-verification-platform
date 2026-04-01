@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import auth, tasks, submissions, execute
+from app.routes import auth, tasks, submissions, execute, profile
 from app.database import engine
 from app.models import User
 
@@ -8,7 +8,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -20,6 +20,7 @@ app.include_router(auth.router)
 app.include_router(tasks.router)
 app.include_router(submissions.router)
 app.include_router(execute.router)
+app.include_router(profile.router)
 
 @app.get("/")
 def home():

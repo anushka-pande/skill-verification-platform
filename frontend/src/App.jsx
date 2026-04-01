@@ -14,6 +14,10 @@ function App() {
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [submissions, setSubmissions] = useState([])
+  const [sortType, setSortType] = useState("latest")
+  const [profileData, setProfileData] = useState(null)
+  const [language, setLanguage] = useState("python")
 
   const handleSubmit = async () => {
     try {
@@ -67,6 +71,37 @@ function App() {
         .catch(err => console.error(err))
     }
   }, [page])
+
+  useEffect(() => {
+    if (page === "submissions") {
+      axios
+        .get("http://127.0.0.1:8000/submissions/1")
+        .then(res => setSubmissions(res.data))
+        .catch(err => console.error(err))
+    }
+  }, [page])
+
+  useEffect(() => {
+    if (page === "profile") {
+      console.log("PROFILE PAGE TRIGGERED")  
+
+      axios
+        .get("http://127.0.0.1:8000/profile/1")
+        .then(res => {
+          console.log("PROFILE DATA:", res.data)  
+          setProfileData(res.data)
+        })
+        .catch(err => {
+          console.error("PROFILE ERROR:", err)    
+        })
+    }
+  }, [page])
+
+  const sortedSubmissions = [...submissions].sort((a, b) => {
+    if (sortType === "latest") return new Date(b.date || 0) - new Date(a.date || 0)
+    if (sortType === "score") return b.score - a.score
+    return 0
+  })
 
   return (
     <>
@@ -137,6 +172,13 @@ function App() {
             <h1 className="text-2xl font-bold text-purple-400">
               Provenix
             </h1>
+
+            <button
+              onClick={() => setPage("submissions")}
+              className="text-slate-300 hover:text-white transition"
+            >
+              Submissions
+            </button>
 
             <div className="relative">
 
@@ -265,6 +307,16 @@ function App() {
           {/* RIGHT PANEL — Editor */}
           <div className="w-1/2 p-6 flex flex-col">
 
+            {/* Language Selector */}
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              className="mb-4 bg-slate-700 p-2 rounded text-white"
+            >
+              <option value="python">Python</option>
+              <option value="cpp">C++</option>
+            </select>
+
             <Editor
               height="60%"
               theme="vs-dark"
@@ -283,7 +335,8 @@ function App() {
                     {
                       user_id: 1,
                       task_id: selectedTask.title,
-                      code: code
+                      code: code,
+                      language: language
                     }
                   )
 
@@ -295,8 +348,9 @@ function App() {
 
                   setResult(execRes.data)
 
-                } catch {
-                  alert("Submission failed")
+                } catch(err) {
+                  console.error(err)
+                  alert(err.response?.data?.detail || "Submission failed")
                 } finally {
                   setLoading(false)
                 }
@@ -350,21 +404,20 @@ function App() {
           </div>
 
           {/* Content */}
-          <div className="bg-slate-800 p-6 rounded-xl w-[400px]">
+          {profileData ? (
+            <div className="bg-slate-800 p-6 rounded-xl w-[400px] space-y-4">
 
-            <p className="text-slate-300">
-              Email: {localStorage.getItem("user")}
-            </p>
+              <p>Email: {localStorage.getItem("user")}</p>
 
-            <p className="mt-4 text-slate-400">
-              Total Submissions: Coming Soon
-            </p>
+              <p>Total Submissions: {profileData.total_submissions}</p>
+              <p>Average Score: {profileData.average_score}</p>
+              <p>Best Score: {profileData.best_score}</p>
+              <p>Success Rate: {profileData.success_rate}%</p>
 
-            <p className="text-slate-400">
-              Average Score: Coming Soon
-            </p>
-
-          </div>
+            </div>
+          ) : (
+            <p className="text-slate-400">Loading...</p>
+          )}
 
         </div>
       )}
@@ -393,6 +446,92 @@ function App() {
             </p>
           </div>
 
+        </div>
+      )}
+
+      {page === "submissions" && (
+        <div className="min-h-screen bg-slate-900 p-10 text-white">
+
+          {/* Top Bar */}
+          <div className="flex items-center gap-4 mb-8">
+            <button
+              onClick={() => setPage("dashboard")}
+              className="bg-slate-700 px-4 py-2 rounded-lg hover:bg-slate-600"
+            >
+              ← Back
+            </button>
+
+            <h1 className="text-2xl font-bold text-purple-400">
+              Submission History
+            </h1>
+          </div>
+
+          <div className="mb-4 flex justify-end">
+            <select
+              onChange={(e) => setSortType(e.target.value)}
+              className="bg-slate-800 border border-slate-700 px-3 py-2 rounded-lg"
+            >
+              <option value="latest">Latest</option>
+              <option value="score">Highest Score</option>
+            </select>
+          </div>
+
+          {/* Table */}
+          <div className="bg-slate-800 rounded-xl overflow-hidden shadow-lg">
+            <table className="w-full text-left">
+              <thead className="bg-slate-700 text-slate-300">
+                <tr>
+                  <th className="p-4">Task</th>
+                  <th className="p-4">Score</th>
+                  <th className="p-4">Status</th>
+                  <th className="p-4">Date</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {sortedSubmissions.length > 0 ? (
+                  sortedSubmissions.map((s, index) => (
+                    <tr
+                      key={index}
+                      className="border-b border-slate-700 hover:bg-slate-700/50 transition duration-200"
+                    >
+                      <td className="p-4">{s.task_id}</td>
+
+                      <td className={`p-4 font-semibold ${
+                        s.score >= 80
+                          ? "text-green-400"
+                          : s.score >= 50
+                          ? "text-yellow-400"
+                          : "text-red-400"
+                      }`}>
+                        {s.score}
+                      </td>
+
+                      <td className="p-4">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            s.status === "Passed"
+                              ? "bg-green-500/20 text-green-400 border border-green-400/30"
+                              : "bg-red-500/20 text-red-400 border border-red-400/30"
+                          }`}
+                        >
+                          {s.status}
+                        </span>
+                      </td>
+
+                      <td className="p-4 text-slate-400">{s.date}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="p-4 text-center text-slate-400">
+                      No submissions yet.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </>
