@@ -378,6 +378,40 @@ function App() {
                   <p>{result.time_score}</p>
                 </div>
 
+                <div className="mt-6 space-y-4">
+                  <h3 className="text-lg font-semibold text-purple-400">
+                    Test Case Results
+                  </h3>
+
+                  {result.details.map((d, index) => (
+                    <div
+                      key={index}
+                      className="bg-slate-700 p-4 rounded-lg text-sm"
+                    >
+                      <p><strong>Input:</strong> {d.input}</p>
+                      <p><strong>Expected:</strong> {d.expected}</p>
+
+                      {d.error ? (
+                        <p className="text-red-400">
+                          <strong>Error:</strong> {d.error}
+                        </p>
+                      ) : (
+                        <>
+                          <p><strong>Actual:</strong> {d.actual}</p>
+                          <p
+                            className={
+                              d.status === "passed"
+                                ? "text-green-400"
+                                : "text-red-400"
+                            }
+                          >
+                            {d.status.toUpperCase()}
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
