@@ -103,6 +103,8 @@ def execute_submission(submission_id: str):
         0.1 * time_score 
     ) 
     
+    failed = total - passed
+
     submissions_collection.update_one( 
         {"_id": ObjectId(submission_id)}, 
         {"$set": { 
@@ -110,17 +112,27 @@ def execute_submission(submission_id: str):
             "quality_score": quality_score, 
             "time_score": time_score, 
             "final_score": final_score, 
-            "evaluation_details": results 
+            "evaluation_details": results,
+            "test_cases_total": total,
+            "test_cases_passed": passed,
+            "test_cases_failed": failed
         }} 
     ) 
-    
+
     return { 
-        "total_test_cases": total, 
-        "passed": passed, 
-        "execution_score": execution_score, 
-        "quality_score": quality_score, 
-        "time_score": time_score, 
-        "final_score": final_score, 
-        "analysis": analysis, 
-        "details": results 
+        "score": round(final_score, 2),
+
+        "test_cases": {
+            "total": total,
+            "passed": passed,
+            "failed": failed
+        },
+
+        "breakdown": {
+            "execution": round(execution_score, 2),
+            "quality": round(quality_score, 2),
+            "time": round(time_score, 2)
+        },
+
+        "details": results
     }

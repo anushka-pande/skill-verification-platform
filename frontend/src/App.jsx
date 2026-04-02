@@ -364,18 +364,27 @@ function App() {
               <div className="mt-6 bg-slate-800 p-6 rounded-xl">
 
                 <h2 className="text-green-400 text-3xl font-bold mb-4">
-                  Score: {result.final_score}
+                  Score: {result.score}
                 </h2>
 
-                <div className="grid grid-cols-2 gap-4 text-slate-300 text-sm">
+                <div className="flex gap-6 mt-4 text-lg font-semibold">
+                  <span className="text-green-400">
+                    ✅ {result.test_cases.passed} Passed
+                  </span>
+                  <span className="text-red-400">
+                    ❌ {result.test_cases.failed} Failed
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-slate-300 text-sm mt-4">
                   <p>Execution:</p>
-                  <p>{result.execution_score}</p>
+                  <p>{result.breakdown.execution}</p>
 
                   <p>Quality:</p>
-                  <p>{result.quality_score}</p>
+                  <p>{result.breakdown.quality}</p>
 
                   <p>Time:</p>
-                  <p>{result.time_score}</p>
+                  <p>{result.breakdown.time}</p>
                 </div>
 
                 <div className="mt-6 space-y-4">
@@ -386,8 +395,13 @@ function App() {
                   {result.details.map((d, index) => (
                     <div
                       key={index}
-                      className="bg-slate-700 p-4 rounded-lg text-sm"
+                      className="bg-slate-700 p-4 rounded-lg text-sm border-l-4 
+                        ${d.status === 'passed' ? 'border-green-400' : 'border-red-400'}"
                     >
+                      <p className="font-semibold mb-1">
+                        Test Case {index + 1}
+                      </p>
+
                       <p><strong>Input:</strong> {d.input}</p>
                       <p><strong>Expected:</strong> {d.expected}</p>
 
@@ -401,8 +415,8 @@ function App() {
                           <p
                             className={
                               d.status === "passed"
-                                ? "text-green-400"
-                                : "text-red-400"
+                                ? "text-green-400 font-semibold"
+                                : "text-red-400 font-semibold"
                             }
                           >
                             {d.status.toUpperCase()}
@@ -447,6 +461,11 @@ function App() {
               <p>Average Score: {profileData.average_score}</p>
               <p>Best Score: {profileData.best_score}</p>
               <p>Success Rate: {profileData.success_rate}%</p>
+              <p>
+                <span className="skill-badge">
+                  Skill Level: {profileData.skill_level}
+                </span>
+              </p>
 
             </div>
           ) : (

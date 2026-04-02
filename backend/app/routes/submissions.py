@@ -44,12 +44,21 @@ def get_submissions(user_id: int):
     cleaned = []
 
     for s in submissions:
+        score = s.get("final_score")
+
+        if score is None:
+            status = "Pending"
+        elif score > 50:
+            status = "Passed"
+        else:
+            status = "Failed"
+            
         cleaned.append({
-            "id": str(s["_id"]),   # ✅ FIX ObjectId
+            "id": str(s["_id"]),   
             "task_id": s.get("task_id"),
             "score": s.get("final_score", 0),
-            "date": str(s.get("created_at")),  # ✅ FIX datetime
-            "status": "Passed" if s.get("final_score", 0) > 50 else "Failed"
+            "date": str(s.get("created_at")),  
+            "status": status
         })
 
     return cleaned
