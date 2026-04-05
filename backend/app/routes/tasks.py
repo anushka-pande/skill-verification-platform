@@ -9,6 +9,13 @@ def create_task(task: dict):
     return {"message": "Task created", "id": str(result.inserted_id)}
 
 @router.get("/tasks")
-def get_tasks():
-    tasks = list(tasks_collection.find({}, {"_id": 0}))
+def get_tasks(difficulty: str = None):
+    
+    query = {}
+
+    if difficulty and difficulty != "All":
+        query["difficulty"] = difficulty
+
+    tasks = list(tasks_collection.find(query, {"_id": 0}))
+
     return tasks

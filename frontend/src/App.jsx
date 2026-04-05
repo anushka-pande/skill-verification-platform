@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import axios from "axios"
 import Editor from "@monaco-editor/react"
+import { Eye, EyeOff } from "lucide-react"
 
 function App() {
   const [isLogin, setIsLogin] = useState(true)
@@ -10,6 +11,7 @@ function App() {
   const [page, setPage] = useState("auth")
   const [tasks, setTasks] = useState([])
   const [selectedTask, setSelectedTask] = useState(null)
+  const [difficulty, setDifficulty] = useState("All")
   const [code, setCode] = useState("")
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -18,17 +20,28 @@ function App() {
   const [sortType, setSortType] = useState("latest")
   const [profileData, setProfileData] = useState(null)
   const [language, setLanguage] = useState("python")
+  const [passwordStrength, setPasswordStrength] = useState("")
+  const [otp, setOtp] = useState("")
+  const [showOtpInput, setShowOtpInput] = useState(false)
+  const [otpEmail, setOtpEmail] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleSubmit = async () => {
+    if (isLogin === false) {
+      if (passwordStrength !== "Strong") {
+        alert("Password is not strong enough")
+        return
+      }
+    }
     try {
       if (isLogin) {
 
-        await axios.post("http://127.0.0.1:8000/login", {
+        const res = await axios.post("http://127.0.0.1:8000/login", {
           email,
           password
         })
 
-        localStorage.setItem("user", email)
+        localStorage.setItem("user_id", res.data.user_id)
 
         // Clear fields
         setEmail("")
@@ -46,8 +59,8 @@ function App() {
           password
         })
 
-        // Auto switch to login after register
-        setIsLogin(true)
+        setOtpEmail(email)
+        setShowOtpInput(true)
 
         // Clear fields
         setName("")
@@ -64,18 +77,35 @@ function App() {
     }
   }
 
+  const checkPasswordStrength = (password) => {
+    let score = 0
+
+    if (password.length >= 8) score++
+    if (/[A-Z]/.test(password)) score++
+    if (/[a-z]/.test(password)) score++
+    if (/[0-9]/.test(password)) score++
+    if (/[^A-Za-z0-9]/.test(password)) score++
+
+    if (score <= 2) return "Weak"
+    if (score === 3 || score === 4) return "Medium"
+    return "Strong"
+  }
+
   useEffect(() => {
     if (page === "dashboard") {
-      axios.get("http://127.0.0.1:8000/tasks")
+      axios
+        .get(`http://127.0.0.1:8000/tasks?difficulty=${difficulty}`)
         .then(res => setTasks(res.data))
         .catch(err => console.error(err))
     }
-  }, [page])
+  }, [page, difficulty]);
 
   useEffect(() => {
     if (page === "submissions") {
+      const userId = localStorage.getItem("user_id")
+
       axios
-        .get("http://127.0.0.1:8000/submissions/1")
+        .get(`http://127.0.0.1:8000/submissions/${userId}`)
         .then(res => setSubmissions(res.data))
         .catch(err => console.error(err))
     }
@@ -85,8 +115,10 @@ function App() {
     if (page === "profile") {
       console.log("PROFILE PAGE TRIGGERED")  
 
+      const userId = localStorage.getItem("user_id")
+
       axios
-        .get("http://127.0.0.1:8000/profile/1")
+        .get(`http://127.0.0.1:8000/profile/${userId}`)
         .then(res => {
           console.log("PROFILE DATA:", res.data)  
           setProfileData(res.data)
@@ -122,7 +154,10 @@ function App() {
                 <input
                   type="text"
                   placeholder="Full Name"
-                  className="w-full p-3 rounded-lg bg-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  disabled={showOtpInput}
+                  className={`w-full p-3 rounded-lg bg-slate-700 text-white ${
+                    showOtpInput ? "opacity-50 cursor-not-allowed" : ""
+                  } focus:outline-none focus:ring-2 focus:ring-purple-500`}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
@@ -131,22 +166,113 @@ function App() {
               <input
                 type="email"
                 placeholder="Email"
-                className="w-full p-3 rounded-lg bg-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                disabled={showOtpInput}
+                className={`w-full p-3 rounded-lg bg-slate-700 text-white ${
+                  showOtpInput ? "opacity-50 cursor-not-allowed" : ""
+                } focus:outline-none focus:ring-2 focus:ring-purple-500`}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
 
-              <input
-                type="password"
-                placeholder="Password"
-                className="w-full p-3 rounded-lg bg-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  disabled={showOtpInput}
+                  className={`w-full p-3 pr-10 rounded-lg bg-slate-700 text-white ${
+                    showOtpInput ? "opacity-50 cursor-not-allowed" : ""
+                  } focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                  value={password}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    setPassword(value)
+                    if (!isLogin) {
+                      setPasswordStrength(checkPasswordStrength(value))
+                    }
+                  }}
+                />
+
+                {/* Icon */}
+                <span
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-300"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </span>
+              </div>
+
+              {!isLogin && !showOtpInput && (
+                <>
+                  <div className="text-xs mt-2 space-y-1">
+                    <p className={password.length >= 8 ? "text-green-400" : "text-red-400"}>
+                      • At least 8 characters
+                    </p>
+                    <p className={/[A-Z]/.test(password) ? "text-green-400" : "text-red-400"}>
+                      • One uppercase letter
+                    </p>
+                    <p className={/[a-z]/.test(password) ? "text-green-400" : "text-red-400"}>
+                      • One lowercase letter
+                    </p>
+                    <p className={/[0-9]/.test(password) ? "text-green-400" : "text-red-400"}>
+                      • One number
+                    </p>
+                    <p className={/[^A-Za-z0-9]/.test(password) ? "text-green-400" : "text-red-400"}>
+                      • One special character
+                    </p>
+                  </div>
+
+                  <p className={`mt-2 font-semibold ${
+                    passwordStrength === "Strong"
+                      ? "text-green-400"
+                      : passwordStrength === "Medium"
+                      ? "text-yellow-400"
+                      : "text-red-400"
+                  }`}>
+                    Strength: {passwordStrength}
+                  </p>
+                </>
+              )}
+
+              {showOtpInput && (
+                <div className="mt-4">
+                  <input
+                    type="text"
+                    placeholder="Enter OTP"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    className="w-full p-3 rounded-lg bg-slate-700 text-white"
+                  />
+
+                  <button
+                    onClick={async () => {
+                      try {
+                        await axios.post("http://127.0.0.1:8000/verify-otp", {
+                          email: otpEmail,
+                          otp
+                        })
+
+                        alert("Email verified successfully")
+
+                        setShowOtpInput(false)
+                        setIsLogin(true)
+
+                      } catch (err) {
+                        alert(err.response?.data?.detail || "Invalid OTP")
+                      }
+                    }}
+                    className="mt-2 w-full bg-green-500 p-2 rounded"
+                  >
+                    Verify OTP
+                  </button>
+                </div>
+              )}
 
               <button
                 onClick={handleSubmit}
-                className="w-full p-3 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:opacity-90 transition text-white font-semibold"
+                disabled={showOtpInput}
+                className={`w-full p-3 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 ${
+                  showOtpInput ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"
+                } transition text-white font-semibold`}
               >
                 {isLogin ? "Login" : "Register"}
               </button>
@@ -168,64 +294,81 @@ function App() {
 
       {page === "dashboard" && (
         <div className="min-h-screen bg-slate-900 p-10">
-          <div className="flex justify-between items-center mb-8 border-b border-slate-700 pb-4">
+          <div className="flex justify-between items-center mb-10 border-b border-slate-700 pb-4">
             <h1 className="text-2xl font-bold text-purple-400">
               Provenix
             </h1>
 
-            <button
-              onClick={() => setPage("submissions")}
-              className="text-slate-300 hover:text-white transition"
-            >
-              Submissions
-            </button>
+            <div className="flex items-center gap-4">
 
-            <div className="relative">
-
-              <button
-                onClick={() => setProfileOpen(!profileOpen)}
-                className="bg-slate-800 px-4 py-2 rounded-lg hover:bg-slate-700 flex items-center gap-2"
+              {/* Difficulty Filter */}
+              <select
+                value={difficulty}
+                onChange={(e) => setDifficulty(e.target.value)}
+                className="p-2 rounded bg-slate-800 text-white border border-slate-700"
               >
-                Profile ▼
+                <option value="All">All</option>
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+              </select>
+
+              {/* Submissions Button */}
+              <button
+                onClick={() => setPage("submissions")}
+                className="text-slate-300 hover:text-white transition"
+              >
+                Submissions
               </button>
 
-              {profileOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-slate-800 rounded-lg shadow-lg border border-slate-700 z-50">
+              {/* Profile Dropdown */}
+              <div className="relative">
 
-                  <button
-                    onClick={() => {
-                      setPage("profile")
-                      setProfileOpen(false)
-                    }}
-                    className="block w-full text-left px-4 py-2 hover:bg-slate-700"
-                  >
-                    My Profile
-                  </button>
+                <button
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className="bg-slate-800 px-4 py-2 rounded-lg hover:bg-slate-700 flex items-center gap-2"
+                >
+                  Profile ▼
+                </button>
 
-                  <button
-                    onClick={() => {
-                      setPage("settings")
-                      setProfileOpen(false)
-                    }}
-                    className="block w-full text-left px-4 py-2 hover:bg-slate-700"
-                  >
-                    Settings
-                  </button>
+                {profileOpen && (
+                  <div className="absolute right-0 mt-2 w-40 bg-slate-800 rounded-lg shadow-lg border border-slate-700 z-50">
 
-                  <button
-                    onClick={() => {
-                      localStorage.removeItem("user")
-                      setPage("auth")
-                      setProfileOpen(false)
-                    }}
-                    className="block w-full text-left px-4 py-2 text-red-400 hover:bg-slate-700"
-                  >
-                    Logout
-                  </button>
+                    <button
+                      onClick={() => {
+                        setPage("profile")
+                        setProfileOpen(false)
+                      }}
+                      className="block w-full text-left px-4 py-2 hover:bg-slate-700"
+                    >
+                      My Profile
+                    </button>
 
-                </div>
-              )}
+                    <button
+                      onClick={() => {
+                        setPage("settings")
+                        setProfileOpen(false)
+                      }}
+                      className="block w-full text-left px-4 py-2 hover:bg-slate-700"
+                    >
+                      Settings
+                    </button>
 
+                    <button
+                      onClick={() => {
+                        localStorage.removeItem("user")
+                        setPage("auth")
+                        setProfileOpen(false)
+                      }}
+                      className="block w-full text-left px-4 py-2 text-red-400 hover:bg-slate-700"
+                    >
+                      Logout
+                    </button>
+
+                  </div>
+                )}
+
+              </div>
             </div>
           </div>
 
@@ -233,30 +376,48 @@ function App() {
             {tasks.map((task, index) => (
               <div
                 key={index}
-                className="bg-slate-800 p-6 rounded-xl shadow-lg hover:scale-105 transition"
+                className="bg-slate-800 p-6 rounded-xl shadow-md hover:shadow-xl hover:scale-[1.03] transition duration-300"
               >
-                <h2 className="text-xl font-semibold">{task.title}</h2>
+                <div className="space-y-2">
+                  <h2 className="text-xl font-bold text-white mb-2">
+                    {task.title}
+                  </h2>
 
-                <span className="inline-block px-3 py-1 text-xs rounded-full bg-green-500/20 text-green-400">
-                  {task.difficulty}
-                </span>
+                  <span
+                    className={`inline-block px-3 py-1 text-xs rounded-full ${
+                      task.difficulty === "Easy"
+                        ? "bg-green-500/20 text-green-400"
+                        : task.difficulty === "Medium"
+                        ? "bg-yellow-500/20 text-yellow-400"
+                        : "bg-red-500/20 text-red-400"
+                    }`}
+                  >
+                    {task.difficulty}
+                  </span>
 
-                <p className="text-slate-400">
-                  Skill: {task.skill}
-                </p>
+                  <p className="text-slate-400">
+                    Skill: {task.skill}
+                  </p>
 
-                <button
-                  onClick={() => {
-                    setSelectedTask(task)
-                    setPage("editor")
-                  }}
-                  className="mt-4 bg-purple-500 px-4 py-2 rounded-lg hover:bg-purple-600"
-                >
-                  Solve
-                </button>
+                  <button
+                    onClick={() => {
+                      setSelectedTask(task)
+                      setPage("editor")
+                    }}
+                    className="mt-4 w-full bg-gradient-to-r from-purple-500 to-blue-500 px-4 py-2 rounded-lg hover:opacity-90 transition font-semibold"
+                  >
+                    Solve
+                  </button>
+                </div>
               </div>
             ))}
           </div>
+
+          {tasks.length === 0 && (
+            <p className="text-slate-400 text-center col-span-full">
+              No tasks found for selected difficulty.
+            </p>
+          )}
         </div>
       )}
 
@@ -333,7 +494,7 @@ function App() {
                   const submitRes = await axios.post(
                     "http://127.0.0.1:8000/submit-code",
                     {
-                      user_id: 1,
+                      user_id: userId,
                       task_id: selectedTask.title,
                       code: code,
                       language: language
