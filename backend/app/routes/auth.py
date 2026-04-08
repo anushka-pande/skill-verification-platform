@@ -46,6 +46,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
         name=user.name,
         email=user.email,
         password=hashed,
+        role=None,
         otp=otp,
         is_verified=False
     )
@@ -75,7 +76,8 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
 
     return {
         "message": "Login successful",
-        "user_id": db_user.id
+        "user_id": db_user.id,
+        "role": db_user.role
     }
 
 @router.post("/verify-otp")
@@ -101,7 +103,7 @@ def verify_otp(data: dict, db: Session = Depends(get_db)):
 
 def send_otp_email(to_email, otp):
     sender_email = "anushkapande04@gmail.com"
-    app_password = "your_app_password"
+    app_password = "dtbk plyn zzua gjqp"
 
     subject = "Your OTP Verification Code"
     body = f"Your OTP is: {otp}"
@@ -119,3 +121,19 @@ def send_otp_email(to_email, otp):
         server.quit()
     except Exception as e:
         print("Email sending failed:", e)
+
+@router.post("/set-role")
+def set_role(data: dict, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == data["user_id"]).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if data["role"] not in ["candidate", "recruiter"]:
+        raise HTTPException(status_code=400, detail="Invalid role")
+
+    user.role = data["role"]
+    db.commit()
+
+    return {"message": "Role updated"}
+

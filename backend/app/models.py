@@ -22,6 +22,7 @@ class User(Base):
     name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True)
     password = Column(String, nullable=False)
+    role = Column(String, nullable=True)
 
     is_verified = Column(Boolean, default=False)
     otp = Column(String, nullable=True)

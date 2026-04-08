@@ -74,9 +74,12 @@ def execute_submission(submission_id: str):
     execution_score = (passed / total) * 100 if total > 0 else 0 
     
     language = submission.get("language", "python")
-    if language == "python":
-        analysis = analyze_code(code) 
-    else:
+    try:
+      if language == "python":
+          analysis = analyze_code(code) 
+      else:
+          analysis = {"line_count": len(code.splitlines()), "loop_count": 0}
+    except:
         analysis = {"line_count": len(code.splitlines()), "loop_count": 0}
     quality_score = 100 
     
