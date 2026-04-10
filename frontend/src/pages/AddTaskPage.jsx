@@ -149,7 +149,7 @@ function AddTaskPage(props) {
                   }
               }}
               className="w-full md:w-auto 
-                        bg-gradient-to-r from-purple-500 to-blue-500 
+                        bg-gradient-to-r from-indigo-500 to-cyan-400
                         px-6 py-3 rounded-lg 
                         font-semibold 
                         hover:opacity-90 

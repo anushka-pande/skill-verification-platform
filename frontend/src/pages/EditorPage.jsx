@@ -21,6 +21,14 @@ function EditorPage(props) {
     setResult(null)
   }, [selectedTask])
 
+  useEffect(() => {
+    if (language === "python") setCode("print(input())")
+    if (language === "cpp") setCode("#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n}")
+    if (language === "c") setCode("#include<stdio.h>\nint main(){\n}")
+    if (language === "javascript") setCode("process.stdin.on('data', d => console.log(d.toString()))")
+    if (language === "java") setCode("public class Main {\n public static void main(String[] args) {\n }\n}")
+  }, [language])
+
   return (
     <div className="min-h-screen bg-slate-900 text-white flex">
       {/* LEFT PANEL — Problem */}
@@ -72,6 +80,9 @@ function EditorPage(props) {
         >
           <option value="python">Python</option>
           <option value="cpp">C++</option>
+          <option value="c">C</option>
+          <option value="javascript">JavaScript</option>
+          <option value="java">Java</option>
         </select>
 
         <Editor
