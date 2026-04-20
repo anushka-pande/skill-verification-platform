@@ -1,12 +1,12 @@
-🟣 PHASE 1 (Days 1–3) — Platform Foundation
-✅ 1️⃣ Submission History Page
+PHASE 1 (Days 1–3) — Platform Foundation
+Submission History Page
 /submissions route
 Show:
 task name
 score
 date
 status
-✅ 2️⃣ Store Proper Data in DB
+Store Proper Data in DB
 
 Update submission model:
 
@@ -16,9 +16,9 @@ Update submission model:
 "created_at"
 "language"
 
-👉 Don’t skip language (needed for multi-language)
+Don’t skip language (needed for multi-language)
 
-✅ 3️⃣ Profile Page Upgrade
+Profile Page Upgrade
 
 Add:
 
@@ -26,18 +26,18 @@ Total submissions
 Average score
 Best score
 Tasks attempted
-🟡 PHASE 1.5 (Days 4–5) — 🔥 MULTI-LANGUAGE EXECUTION
-✅ 4️⃣ Backend Executor Upgrade
+PHASE 1.5 (Days 4–5) — 🔥 MULTI-LANGUAGE EXECUTION
+Backend Executor Upgrade
 
 Support:
 
-Python ✅ (already)
-C++ ✅ (add now)
+Python (already)
+C++ (add now)
 
 Structure:
 
 execute_code(code, input, language)
-✅ 5️⃣ C++ Execution Flow
+C++ Execution Flow
 Save .cpp
 Compile → g++ file.cpp -o out
 Run → ./out
@@ -46,12 +46,12 @@ Handle:
 
 compile errors
 runtime errors
-✅ 6️⃣ Update Submission API
+Update Submission API
 
 Add:
 
 "language": "python" / "cpp"
-✅ 7️⃣ UI Language Selector (Editor Page)
+UI Language Selector (Editor Page)
 
 Add dropdown:
 
@@ -59,12 +59,12 @@ Python | C++
 
 Pass it to backend
 
-👉 After this phase, you can confidently say:
+After this phase, you can confidently say:
 
 “System supports multi-language execution”
 
-🟣 PHASE 2 (Days 6–8) — Smart Platform Features
-✅ 8️⃣ Performance Analytics
+PHASE 2 (Days 6–8) — Smart Platform Features
+Performance Analytics
 
 Backend:
 
@@ -76,13 +76,13 @@ Frontend:
 
 Average Score: 78
 Success Rate: 65%
-✅ 9️⃣ Difficulty-Based UI
+Difficulty-Based UI
 Color badges:
 Easy → green
 Medium → yellow
 Hard → red
 Filter by difficulty
-✅ 🔟 Better Evaluation Display
+Better Evaluation Display
 
 Instead of just score:
 
@@ -92,10 +92,8 @@ passed test cases
 failed test cases
 error messages
 
-👉 This is HIGH IMPACT
-
-🟣 PHASE 3 (Days 9–11) — Intelligence Layer
-✅ 11️⃣ Skill Level Classification (ML-lite)
+ PHASE 3 (Days 9–11) — Intelligence Layer
+ Skill Level Classification (ML-lite)
 >80 → Advanced
 50–80 → Intermediate
 <50 → Beginner
@@ -104,7 +102,7 @@ Store in DB
 
 Show in profile
 
-✅ 12️⃣ Basic Plagiarism Indicator (Simple Rule-Based)
+Basic Plagiarism Indicator (Simple Rule-Based)
 
 Options:
 
@@ -115,33 +113,14 @@ Return:
 
 Low / Medium / High similarity
 
-👉 Keep it simple, don’t overthink
+Keep it simple, don’t overthink
 
-🟣 PHASE 4 (Days 12–15) — Product Polish
-✅ 13️⃣ UI Polish
+PHASE 4 (Days 12–15) — Product Polish
+ UI Polish
 spacing consistency
 hover effects
 smoother layout
 better alignment
-✅ 14️⃣ Landing Page
+ Landing Page
 Hero section
 “Start Coding” button
-Clean intro
-✅ 15️⃣ Final Demo Preparation (Merged with Polish)
-
-Prepare:
-
-3–4 tasks
-different difficulties
-clean test cases
-🎯 FINAL STRUCTURE (What Your Project Becomes)
-
-By end:
-
-✔ Multi-language execution (Python + C++)
-✔ Evaluation engine (correct + structured)
-✔ Submission tracking
-✔ User analytics
-✔ Skill classification
-✔ Clean UI
-✔ Real platform feel

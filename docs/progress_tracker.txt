@@ -1,4 +1,4 @@
-Core Backend (Strong)
+Core Backend
     Authentication (Register/Login)
     PostgreSQL (Users)
     MongoDB (Tasks + Submissions)
@@ -17,7 +17,7 @@ Core Backend (Strong)
 
 
 
-Frontend (Very Strong for MVP)
+Frontend 
 
     Auth UI (Login/Register)
     Dashboard (Tasks list)
