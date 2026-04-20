@@ -1,126 +1,106 @@
-PHASE 1 (Days 1–3) — Platform Foundation
-Submission History Page
-/submissions route
-Show:
-task name
-score
-date
-status
-Store Proper Data in DB
+🔥 MASTER TODO LIST (Best Roadmap)
+PHASE 1 — Reliability / Core Engine (Highest Priority)
+Execution Stability
 
-Update submission model:
+⬜ Normalize outputs (True, true, spaces, newline issues)
+⬜ Increase execution timeout smartly
+⬜ Separate compile timeout vs run timeout
+⬜ Cleanup temp files after execution
+⬜ Wrap analyzer in try/except
+⬜ Better syntax error handling
+⬜ Better runtime error messages
+⬜ Support larger code submissions safely
 
-"user_id"
-"task_id"
-"final_score"
-"created_at"
-"language"
+Judge Quality
 
-Don’t skip language (needed for multi-language)
+⬜ Hidden test cases
+⬜ Weighted scoring
+⬜ Better pass/fail logic
 
-Profile Page Upgrade
+PHASE 2 — Role Based Product System
+Access Control
 
-Add:
+⬜ Full role-based frontend routing
+⬜ Candidate cannot access recruiter pages
+⬜ Recruiter cannot access candidate-only admin pages
+⬜ Hide buttons by role
+⬜ Unauthorized API protection
 
-Total submissions
-Average score
-Best score
-Tasks attempted
-PHASE 1.5 (Days 4–5) — 🔥 MULTI-LANGUAGE EXECUTION
-Backend Executor Upgrade
+PHASE 3 — Language Expansion
+Add More Languages
 
-Support:
+⬜ C support
+⬜ Java support
+⬜ JavaScript support
+⬜ Default starter templates for each language
+⬜ Language-specific compile/run logic
 
-Python (already)
-C++ (add now)
+PHASE 4 — Recruiter Power Features
+Dashboard Upgrade
 
-Structure:
+⬜ Candidate ranking leaderboard
+⬜ Skill-wise charts
+⬜ Filter by language / skill / score
+⬜ Search candidate
+⬜ Candidate comparison view
+⬜ Export report CSV/PDF
 
-execute_code(code, input, language)
-C++ Execution Flow
-Save .cpp
-Compile → g++ file.cpp -o out
-Run → ./out
+Hiring Actions
 
-Handle:
+⬜ Shortlist persistence in DB
+⬜ Reject persistence in DB
+⬜ Notes for recruiter
 
-compile errors
-runtime errors
-Update Submission API
+PHASE 5 — Anti-Cheating / Integrity
+Plagiarism Detection
 
-Add:
+⬜ Similarity scoring between submissions
+⬜ Flag suspicious submissions
+⬜ Show recruiter alerts
+⬜ Compare only same-task solutions
+⬜ Ignore whitespace/comments
 
-"language": "python" / "cpp"
-UI Language Selector (Editor Page)
+Extra Integrity
 
-Add dropdown:
+⬜ Copy-paste tracking (optional)
+⬜ Submission timestamps analysis
 
-Python | C++
+PHASE 6 — UI Polish
+Visual Improvement
 
-Pass it to backend
+⬜ Better theme
+⬜ Consistent spacing
+⬜ Better cards
+⬜ Better tables
+⬜ Responsive layout
+⬜ Cleaner navbar
+⬜ Better editor layout
 
-After this phase, you can confidently say:
+UX
 
-“System supports multi-language execution”
+⬜ Toast notifications
+⬜ Loading spinners
+⬜ Empty states
+⬜ Success animations (minimal)
 
-PHASE 2 (Days 6–8) — Smart Platform Features
-Performance Analytics
+PHASE 7 — Advanced Features (Impressive)
+Analytics
 
-Backend:
+⬜ Progress graphs for users
+⬜ Skill growth over time
+⬜ Accuracy trends
 
-avg score
-attempts
-success rate
+Smart Features
 
-Frontend:
+⬜ AI code review
+⬜ AI improvement suggestions
+⬜ Recommend next problems
 
-Average Score: 78
-Success Rate: 65%
-Difficulty-Based UI
-Color badges:
-Easy → green
-Medium → yellow
-Hard → red
-Filter by difficulty
-Better Evaluation Display
 
-Instead of just score:
+If limited time, prioritize only these:
 
-Show:
-
-passed test cases
-failed test cases
-error messages
-
- PHASE 3 (Days 9–11) — Intelligence Layer
- Skill Level Classification (ML-lite)
->80 → Advanced
-50–80 → Intermediate
-<50 → Beginner
-
-Store in DB
-
-Show in profile
-
-Basic Plagiarism Indicator (Simple Rule-Based)
-
-Options:
-
-compare code length
-simple string similarity
-
-Return:
-
-Low / Medium / High similarity
-
-Keep it simple, don’t overthink
-
-PHASE 4 (Days 12–15) — Product Polish
- UI Polish
-spacing consistency
-hover effects
-smoother layout
-better alignment
- Landing Page
-Hero section
-“Start Coding” button
+1. Role-based access
+2. Java + JS support
+3. Plagiarism detection
+4. Recruiter charts
+5. Stable execution engine

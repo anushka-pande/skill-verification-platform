@@ -9,6 +9,7 @@ import ProfilePage from "./pages/Profile"
 import SubmissionsPage from "./pages/SubmissionsPage"
 import AddTaskPage from "./pages/AddTaskPage"
 import RecruiterPage from "./pages/RecruiterPage"
+import ChooseRole from "./pages/chooseRole"
 import SettingsPage from "./pages/SettingsPage"
 
 function App() {
@@ -55,6 +56,8 @@ function App() {
   const [shortlisted, setShortlisted] = useState([])
   const [rejected, setRejected] = useState([])
 
+  const role = localStorage.getItem("role")
+
   const userEmail = localStorage.getItem("user_email")
   const isAdmin = userEmail === "anushkapande04@gmail.com"
 
@@ -73,7 +76,9 @@ function App() {
           password
         })
 
+        localStorage.setItem("token", res.data.token)
         localStorage.setItem("user_id", res.data.user_id)
+        localStorage.setItem("role", res.data.role)
         localStorage.setItem("user_email", email)
 
         // Clear fields
@@ -81,7 +86,17 @@ function App() {
         setPassword("")
 
         // redirect
-        setPage("dashboard")
+        if(res.data.role) {
+          localStorage.setItem("role", res.data.role)
+          if (res.data.role === "recruiter") {
+            setPage("recruiter")
+          } else {
+            setPage("dashboard")
+          }
+        }
+        else {
+          setPage("choose-role")
+        }
         setProfileOpen(false)
 
       } else {
@@ -97,7 +112,6 @@ function App() {
 
         // Clear fields
         setName("")
-        setEmail("")
         setPassword("")
       }
 
@@ -158,7 +172,15 @@ function App() {
 
   useEffect(() => {
     if (page === "recruiter") {
-      axios.get("http://127.0.0.1:8000/recruiter/overview")
+      axios.get(
+        "http://127.0.0.1:8000/recruiter/overview",
+        {
+          headers: {
+            Authorization:
+              "Bearer " + localStorage.getItem("token")
+          }
+        }
+      )
         .then(res => setRecruiterData(res.data))
     }
   }, [page])
@@ -233,7 +255,7 @@ function App() {
         />
       )}
 
-      {page === "add-task" && (
+      {page === "add-task" && isAdmin && (
         <AddTaskPage
           setPage={setPage}
           title={title}
@@ -251,7 +273,7 @@ function App() {
         />
       )}
 
-      {page === "recruiter" && (
+      {page === "recruiter" && role === "recruiter" && (
         <RecruiterPage
           setPage={setPage}
           recruiterData={recruiterData}
@@ -266,6 +288,10 @@ function App() {
           rejected={rejected}
           setRejected={setRejected}
         />
+      )}
+
+      {page === "choose-role" && (
+        <ChooseRole setPage={setPage} />
       )}
 
       {page === "settings" && (

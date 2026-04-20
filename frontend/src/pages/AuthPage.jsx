@@ -1,4 +1,5 @@
 import { Eye, EyeOff } from "lucide-react"
+import axios from "axios"
 
 function AuthPage(props) {
   const {
@@ -157,6 +158,8 @@ function AuthPage(props) {
 
                         setShowOtpInput(false)
                         setIsLogin(true)
+                        setEmail("")
+                        setOtp("")
 
                       } catch (err) {
                         alert(err.response?.data?.detail || "Invalid OTP")
