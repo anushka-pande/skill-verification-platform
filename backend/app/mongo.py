@@ -8,3 +8,4 @@ db = client["skill_verification"]
 
 tasks_collection = db["tasks"]
 submissions_collection = db["submissions"]
+recruiter_status_collection = db["recruiter_status"]

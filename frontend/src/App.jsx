@@ -55,8 +55,8 @@ function App() {
   const [selectedCandidate, setSelectedCandidate] = useState(null)
   const [candidateSort, setCandidateSort] = useState("score")
   const [skillFilter, setSkillFilter] = useState("")
-  const [shortlisted, setShortlisted] = useState([])
-  const [rejected, setRejected] = useState([])
+  const [candidateStatus, setCandidateStatus] = useState({})
+  const [plagiarismData, setPlagiarismData] = useState([])
 
   const role = localStorage.getItem("role")
 
@@ -126,8 +126,6 @@ function App() {
     }
   }
 
-  
-
   useEffect(() => {
     if (page === "dashboard") {
       const url =
@@ -172,19 +170,33 @@ function App() {
     }
   }, [page])
 
+  const token = localStorage.getItem("token")
+
   useEffect(() => {
     if (page === "recruiter") {
-      axios.get(
-        "http://127.0.0.1:8000/recruiter/overview",
-        {
-          headers: {
-            Authorization:
-              "Bearer " + localStorage.getItem("token")
-          }
-        }
-      )
-        .then(res => setRecruiterData(res.data))
+      Promise.all([
+        axios.get(
+          "http://127.0.0.1:8000/recruiter/overview",
+          { headers: { Authorization: `Bearer ${token}` } }
+        ),
+
+        axios.get(
+          "http://127.0.0.1:8000/recruiter/plagiarism",
+          { headers: { Authorization: `Bearer ${token}` } }
+        ),
+
+        axios.get(
+          "http://127.0.0.1:8000/recruiter/status",
+          { headers: { Authorization:`Bearer ${token}` } }
+        )
+      ])
+      .then(([overviewRes, plagiarismRes, statusRes]) => {
+        setRecruiterData(overviewRes.data)
+        setPlagiarismData(plagiarismRes.data)
+        setCandidateStatus(statusRes.data)
+      })
     }
+
   }, [page])
 
   return (
@@ -287,10 +299,9 @@ function App() {
           setCandidateSort={setCandidateSort}
           skillFilter={skillFilter}
           setSkillFilter={setSkillFilter}
-          shortlisted={shortlisted}
-          setShortlisted={setShortlisted}
-          rejected={rejected}
-          setRejected={setRejected}
+          candidateStatus={candidateStatus}
+          setCandidateStatus={setCandidateStatus}
+          plagiarismData={plagiarismData}
         />
       )}
 
