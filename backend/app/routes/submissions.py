@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from app.mongo import submissions_collection
 from datetime import datetime
 
@@ -14,7 +14,7 @@ def submit_code(submission: dict):
   try:
     user_id = int(user_id)
   except:
-    raise HTTPExecption(status_code=400, detail="Invalid user id")
+    raise HTTPException(status_code=400, detail="Invalid user id")
 
   submission_data = {
     "user_id": user_id,

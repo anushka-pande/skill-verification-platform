@@ -1,8 +1,12 @@
 import Editor from "@monaco-editor/react"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import axios from "axios"
 
 function EditorPage(props) {
+  const [customInput, setCustomInput] = useState("")
+  const [runLoading, setRunLoading] = useState(false)
+  const [submitLoading, setSubmitLoading] = useState(false)
+  const [timeLeft, setTimeLeft] = useState(0)
   const {
     selectedTask,
     setPage,
@@ -11,9 +15,7 @@ function EditorPage(props) {
     language,
     setLanguage,
     result,
-    setResult,
-    loading,
-    setLoading
+    setResult
   } = props
 
   useEffect(() => {
@@ -28,6 +30,24 @@ function EditorPage(props) {
     if (language === "javascript") setCode("process.stdin.on('data', d => console.log(d.toString()))")
     if (language === "java") setCode("public class Main {\n public static void main(String[] args) {\n }\n}")
   }, [language])
+
+  useEffect(() => {
+    const minutes = selectedTask.solve_time_limit || 20
+    setTimeLeft(minutes * 60)
+  }, [selectedTask])
+
+  useEffect(() => {
+    if (timeLeft <= 0) return
+
+    const timer = setInterval(() => {
+      setTimeLeft(prev => prev - 1)
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [timeLeft])
+
+  const mins = Math.floor(timeLeft / 60)
+  const secs = timeLeft % 60
 
   return (
     <div className="min-h-screen bg-slate-900 text-white flex">
@@ -58,9 +78,15 @@ function EditorPage(props) {
           {selectedTask.title}
         </h1>
 
-        <p className="mt-4 text-slate-400">
-          Difficulty: {selectedTask.difficulty}
-        </p>
+        <div className="mt-4 flex flex-wrap gap-4 text-sm text-slate-400">
+          <span>Difficulty: {selectedTask.difficulty}</span>
+          <span>Runtime Limit: {selectedTask.execution_time_limit || 1}s</span>
+          <span>Recommended Time: {selectedTask.solve_time_limit || 20} min</span>
+
+          <span className="text-yellow-400 font-semibold">
+            ⏱ {mins}:{secs.toString().padStart(2, "0")}
+          </span>
+        </div>
 
         <div className="mt-6 bg-slate-800 p-6 rounded-xl">
           <p className="mt-6 text-slate-400">
@@ -86,51 +112,110 @@ function EditorPage(props) {
         </select>
 
         <Editor
-          height="60%"
+          height="420px"
           theme="vs-dark"
           defaultLanguage="python"
           value={code}
           onChange={(value) => setCode(value)}
         />
 
-        <button
-          onClick={async () => {
-            try {
-              setLoading(true)
+        <textarea
+          rows="4"
+          value={customInput}
+          onChange={(e) => setCustomInput(e.target.value)}
+          placeholder="Custom input for Run Code"
+          className="mt-4 bg-slate-800 p-3 rounded text-white"
+        />
 
-              const userId = localStorage.getItem("user_id")
-              
-              const submitRes = await axios.post(
-                "http://127.0.0.1:8000/submit-code",
-              {
-                user_id: userId,
-                task_id: selectedTask.title,
-                code: code,
-                language: language
+        <div className="flex gap-4 mt-4">
+          <button
+            onClick={async () => {
+              try {
+                setRunLoading(true)
+
+                const res = await axios.post(
+                  "http://127.0.0.1:8000/run-code",
+                  {
+                    code,
+                    language,
+                    input: customInput
+                  }
+                )
+
+                setResult({
+                  runOnly: true,
+                  ...res.data
+                })
+
+              } catch (err) {
+                alert("Run failed")
+              } finally {
+                setRunLoading(false)
               }
-              )
+            }}
+            className="bg-slate-700 px-6 py-3 rounded-lg"
+          >
+            {runLoading ? "Running..." : "Run Code"}
+          </button>
 
-              const submissionId = submitRes.data.submission_id
+          <button
+            onClick={async () => {
+              try {
+                setSubmitLoading(true)
 
-              const execRes = await axios.post(
-                `http://127.0.0.1:8000/execute/${submissionId}`
-              )
+                const userId = localStorage.getItem("user_id")
 
-              setResult(execRes.data)
+                const submitRes = await axios.post(
+                  "http://127.0.0.1:8000/submit-code",
+                  {
+                    user_id: userId,
+                    task_id: selectedTask.title,
+                    code,
+                    language
+                  }
+                )
 
-            } catch(err) {
-                console.error(err)
-                alert(err.response?.data?.detail || "Submission failed")
-            } finally {
-                setLoading(false)
-            }
-          }}
-          className="mt-4 bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg transition"
-        >
-          {loading ? "Evaluating..." : "Run Code"}
-        </button>
+                const submissionId = submitRes.data.submission_id
 
-        {result && (
+                const execRes = await axios.post(
+                  `http://127.0.0.1:8000/execute/${submissionId}`
+                )
+
+                setResult(execRes.data)
+
+              } catch (err) {
+                alert("Submission failed")
+              } finally {
+                setSubmitLoading(false)
+              }
+            }}
+            className="bg-purple-600 px-6 py-3 rounded-lg"
+          >
+            {submitLoading ? "Submitting..." : "Submit Code"}
+          </button>
+        </div>
+
+        {result?.runOnly && (
+          <div className="mt-6 bg-slate-800 p-6 rounded-xl">
+            <h2 className="text-cyan-400 text-xl mb-3">Run Result</h2>
+
+            {result.error ? (
+              <pre className="text-red-400 whitespace-pre-wrap">
+                {result.error}
+              </pre>
+            ) : (
+              <pre className="text-green-400 whitespace-pre-wrap">
+                {result.output}
+              </pre>
+            )}
+
+            <p className="text-slate-400 mt-2">
+              Execution Time: {result.execution_time}s
+            </p>
+          </div>
+        )}
+
+        {result && !result.runOnly && (
           <div className="mt-6 bg-slate-800 p-6 rounded-xl">
             <h2 className="text-green-400 text-3xl font-bold mb-4">
               Score: {result.score}
@@ -167,20 +252,16 @@ function EditorPage(props) {
                 className={`bg-slate-700 p-4 rounded-lg text-sm border-l-4 
                 ${d.status === 'passed' ? 'border-green-400' : 'border-red-400'}`}
               >
-                <p className="font-semibold mb-1">
-                  Test Case {index + 1}
+                <p className="font-semibold mb-1 flex items-center gap-2">
+                  <span>Test Case {index + 1}</span>
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    d.hidden ? "bg-red-500/20 text-red-300" : "bg-green-500/20 text-green-300"
+                  }`}>
+                    {d.hidden ? "Hidden" : "Public"}
+                  </span>
                 </p>
 
-                <p><strong>Input:</strong> {d.input}</p>
-                <p><strong>Expected:</strong> {d.expected}</p>
-
-                {d.error ? (
-                  <p className="text-red-400">
-                    <strong>Error:</strong> {d.error}
-                  </p>
-                ) : (
-                <>
-                  <p><strong>Actual:</strong> {d.actual}</p>
+                {d.hidden ? (
                   <p
                     className={
                       d.status === "passed"
@@ -190,7 +271,30 @@ function EditorPage(props) {
                   >
                     {d.status.toUpperCase()}
                   </p>
-                </>
+                ) : (
+                  <>
+                    <p><strong>Input:</strong> {d.input}</p>
+                    <p><strong>Expected:</strong> {d.expected}</p>
+
+                    {d.error ? (
+                      <p className="text-red-400">
+                        <strong>Error:</strong> {d.error}
+                      </p>
+                    ) : (
+                      <>
+                        <p><strong>Actual:</strong> {d.actual}</p>
+                        <p
+                          className={
+                            d.status === "passed"
+                            ? "text-green-400 font-semibold"
+                            : "text-red-400 font-semibold"
+                          }
+                        >
+                          {d.status.toUpperCase()}
+                        </p>
+                      </>
+                    )}
+                  </>
                 )}
               </div>
               ))}

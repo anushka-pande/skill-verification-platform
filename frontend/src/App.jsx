@@ -31,7 +31,6 @@ function App() {
   const [difficulty, setDifficulty] = useState("All")
   const [code, setCode] = useState("")
   const [result, setResult] = useState(null)
-  const [loading, setLoading] = useState(false)
   const [language, setLanguage] = useState("python")
 
   const [profileOpen, setProfileOpen] = useState(false)
@@ -42,10 +41,13 @@ function App() {
 
   const [title, setTitle] = useState("")
   const [skill, setSkill] = useState("")
-  const [timeLimit, setTimeLimit] = useState(1)
-  const [testCases, setTestCases] = useState([
+  const [executionTimeLimit, setExecutionTimeLimit] = useState(1)
+  const [solveTimeLimit, setSolveTimeLimit] = useState(20)
+  const [publicCases, setPublicCases] = useState([
     { input: "", output: "" },
-    { input: "", output: "" }
+  ])
+  const [hiddenCases, setHiddenCases] = useState([
+    { input:"", output:"" }
   ])
   const [taskSuccess, setTaskSuccess] = useState(false)
 
@@ -234,8 +236,6 @@ function App() {
           setLanguage={setLanguage}
           result={result}
           setResult={setResult}
-          loading={loading}
-          setLoading={setLoading}
         />
       )}
 
@@ -262,12 +262,16 @@ function App() {
           setTitle={setTitle}
           skill={skill}
           setSkill={setSkill}
-          timeLimit={timeLimit}
-          setTimeLimit={setTimeLimit}
+          executionTimeLimit={executionTimeLimit}
+          setExecutionTimeLimit={setExecutionTimeLimit}
+          solveTimeLimit={solveTimeLimit}
+          setSolveTimeLimit={setSolveTimeLimit}
           difficulty={difficulty}
           setDifficulty={setDifficulty}
-          testCases={testCases}
-          setTestCases={setTestCases}
+          publicCases={publicCases}
+          setPublicCases={setPublicCases}
+          hiddenCases={hiddenCases}
+          setHiddenCases={setHiddenCases}
           taskSuccess={taskSuccess}
           setTaskSuccess={setTaskSuccess}
         />

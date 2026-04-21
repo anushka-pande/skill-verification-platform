@@ -7,12 +7,16 @@ function AddTaskPage(props) {
     setTitle,
     skill,
     setSkill,
-    timeLimit,
-    setTimeLimit,
+    executionTime,
+    setExecutionTime,
+    solveTime,
+    setSolveTime,
     difficulty,
     setDifficulty,
-    testCases,
-    setTestCases,
+    publicCases,
+    setPublicCases,
+    hiddenCases,
+    setHiddenCases,
     taskSuccess,
     setTaskSuccess
   } = props
@@ -59,36 +63,98 @@ function AddTaskPage(props) {
           onChange={(e) => setSkill(e.target.value)}
         />
 
-        {/* Time Limit */}
-        <input
-          type="number"
-          value={timeLimit}
-          placeholder="Time Limit (seconds)"
-          className="w-full p-3 mb-3 bg-slate-700 rounded"
-          onChange={(e) => setTimeLimit(Number(e.target.value))}
-        />
+        {/* Execution time Limit */}
+        <div className="mb-3">
+          <label className="block text-sm text-slate-300 mb-2">
+            Execution Time Limit (seconds)
+          </label>
 
-        {testCases.map((tc, index) => (
+          <select
+            value={executionTime}
+            className="w-full p-3 bg-slate-700 rounded"
+            onChange={(e) => setExecutionTime(Number(e.target.value))}
+          >
+            <option value={1}>1 second</option>
+            <option value={2}>2 seconds</option>
+            <option value={3}>3 seconds</option>
+            <option value={5}>5 seconds</option>
+            <option value={10}>10 seconds</option>
+          </select>
+
+          <div className="mb-3">
+            <label className="block text-sm text-slate-300 mb-2">
+              Recommended Solve Time (minutes)
+            </label>
+
+            <select
+              value={solveTime}
+              className="w-full p-3 bg-slate-700 rounded"
+              onChange={(e) => setSolveTime(Number(e.target.value))}
+            >
+              <option value={15}>15 min</option>
+              <option value={20}>20 min</option>
+              <option value={30}>30 min</option>
+              <option value={45}>45 min</option>
+              <option value={60}>60 min</option>
+            </select>
+          </div>
+        </div>
+
+        <h2 className="text-lg text-green-400 mb-3">Public Test Cases</h2>
+
+        {publicCases.map((tc, index) => (
           <div key={index} className="mb-4">
-            <input
-              placeholder={`Test Case ${index + 1} Input`}
+            <textarea
+              rows="3"
+              placeholder={`Public Input ${index + 1}`}
               className="w-full p-3 mb-2 bg-slate-700 rounded"
               value={tc.input}
               onChange={(e) => {
-                const updated = [...testCases]
+                const updated = [...publicCases]
                 updated[index].input = e.target.value
-                setTestCases(updated)
+                setPublicCases(updated)
               }}
             />
 
-            <input
-              placeholder={`Expected Output`}
+            <textarea
+              rows="2"
+              placeholder="Expected Output"
               className="w-full p-3 bg-slate-700 rounded"
               value={tc.output}
               onChange={(e) => {
-                const updated = [...testCases]
+                const updated = [...publicCases]
                 updated[index].output = e.target.value
-                setTestCases(updated)
+                setPublicCases(updated)
+              }}
+            />
+          </div>
+        ))}
+
+        <h2 className="text-lg text-red-400 mt-6 mb-3">Hidden Test Cases</h2>
+
+        {hiddenCases.map((tc, index) => (
+          <div key={index} className="mb-4">
+            <textarea
+              rows="3"
+              placeholder={`Hidden Input ${index + 1}`}
+              className="w-full p-3 mb-2 bg-slate-700 rounded"
+              value={tc.input}
+              onChange={(e) => {
+                const updated = [...hiddenCases]
+                updated[index].input = e.target.value
+                setHiddenCases(updated)
+              }}
+            />
+
+            <textarea
+              rows="2"
+              placeholder="Expected Output"
+              className="w-full p-3 bg-slate-700 rounded"
+              value={tc.output}
+              onChange={(e) => {
+                const updated = [...hiddenCases]
+                updated[index].output = e.target.value
+                setHiddenCases(updated)
               }}
             />
           </div>
@@ -96,17 +162,34 @@ function AddTaskPage(props) {
 
         <div className="mt-6 border-t border-slate-700 pt-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-4">
-            <button
-              onClick={() =>
-                setTestCases([...testCases, { input: "", output: "" }])
-              }
-              className="flex items-center gap-2 px-4 py-2 mb-4 
-                        bg-slate-700 hover:bg-slate-600 
-                        text-purple-400 rounded-lg 
-                        transition duration-200"
-            >
-              + Add Test Case
-            </button>
+            <div>
+              <button
+                onClick={() =>
+                  setPublicCases([...publicCases, { input: "", output: "" }])
+                }
+                className="flex items-center gap-2 px-4 py-2 mb-4 
+                          bg-slate-700 hover:bg-slate-600 
+                          text-purple-400 rounded-lg 
+                          transition duration-200"
+              >
+                + Add Test Case
+              </button>
+
+              <button
+                onClick={() =>
+                  setHiddenCases([
+                    ...hiddenCases,
+                    { input: "", output: "" }
+                  ])
+                }
+                className="flex items-center gap-2 px-4 py-2 mb-4
+                          bg-slate-700 hover:bg-slate-600
+                          text-red-400 rounded-lg
+                          transition duration-200"
+              >
+                + Add Hidden Test Case
+              </button>
+            </div>
 
             {taskSuccess && (
               <p className="text-green-400 mb-4">
@@ -126,8 +209,10 @@ function AddTaskPage(props) {
                     title,
                     difficulty,
                     skill,
-                    time_limit: timeLimit,
-                    test_cases: testCases
+                    execution_time_limit: executionTime,
+                    solve_time_limit: solveTime,
+                    public_test_cases: publicCases,
+                    hidden_test_cases: hiddenCases
                   })
 
                   setTaskSuccess(true)
@@ -136,10 +221,13 @@ function AddTaskPage(props) {
 
                   setTitle("")
                   setSkill("")
-                  setTimeLimit(1)
+                  setExecutionTime(1)
+                  setSolveTime(20)
                   setDifficulty("")
-                  setTestCases([
-                    { input: "", output: "" },
+                  setPublicCases([
+                    { input: "", output: "" }
+                  ])
+                  setHiddenCases([
                     { input: "", output: "" }
                   ])
 

@@ -3,21 +3,16 @@ import tempfile
 import time
 import os
 
-
-def execute_python(code: str, test_input: str):
+def docker_run(cmd, test_input):
   try:
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".py") as temp:
-      temp.write(code.encode())
-      temp_path = temp.name
-
     start = time.time()
 
     process = subprocess.run(
-      ["python3", temp_path],
+      cmd,
       input=test_input,
       text=True,
       capture_output=True,
-      timeout=2
+      timeout=3
     )
 
     end = time.time()
@@ -29,138 +24,118 @@ def execute_python(code: str, test_input: str):
     }
 
   except subprocess.TimeoutExpired:
-    return {"error": "Execution timed out"}
-
-
-def execute_cpp(code: str, test_input: str):
-  try:
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".cpp") as temp:
-      temp.write(code.encode())
-      cpp_path = temp.name
-
-    exe_path = cpp_path.replace(".cpp", "")
-
-    # Compile
-    compile_process = subprocess.run(
-      ["g++", cpp_path, "-o", exe_path],
-      capture_output=True,
-      text=True
-    )
-
-    if compile_process.returncode != 0:
-      return {"error": compile_process.stderr}
-
-    # Run
-    start = time.time()
-
-    run_process = subprocess.run(
-      exe_path,
-      input=test_input,
-      text=True,
-      capture_output=True,
-      timeout=2,
-      shell=True
-    )
-
-    end = time.time()
-
     return {
-      "output": run_process.stdout.strip(),
-      "error": run_process.stderr.strip(),
-      "execution_time": end - start
+      "error": "Execution timed out",
+      "execution_time": 3
     }
 
-  except subprocess.TimeoutExpired:
-    return {"error": "Execution timed out"}
-    
-def execute_c(code: str, test_input: str):
-  try:
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".c") as temp:
-      temp.write(code.encode())
-      c_path = temp.name
+def execute_python(code: str, test_input: str):
+  with tempfile.TemporaryDirectory() as temp_dir:
 
-    exe_path = c_path.replace(".c", "")
-
-    compile_process = subprocess.run(
-      ["gcc", c_path, "-o", exe_path],
-      capture_output=True,
-      text=True
-    )
-
-    if compile_process.returncode != 0:
-      return {"error": compile_process.stderr}
-
-    run_process = subprocess.run(
-      exe_path,
-      input=test_input,
-      text=True,
-      capture_output=True,
-      timeout=2,
-      shell=True
-    )
-
-    return {
-      "output": run_process.stdout.strip(),
-      "error": run_process.stderr.strip()
-    }
-
-  except subprocess.TimeoutExpired:
-    return {"error": "Execution timed out"}
-    
-def execute_js(code: str, test_input: str):
-  try:
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".js") as temp:
-      temp.write(code.encode())
-      js_path = temp.name
-
-    process = subprocess.run(
-      ["node", js_path],
-      input=test_input,
-      text=True,
-      capture_output=True,
-      timeout=2
-    )
-
-    return {
-      "output": process.stdout.strip(),
-      "error": process.stderr.strip()
-    }
-
-  except subprocess.TimeoutExpired:
-    return {"error": "Execution timed out"}
-  
-def execute_java(code: str, test_input: str):
-  try:
-    dir_path = tempfile.mkdtemp()
-    file_path = os.path.join(dir_path, "Main.java")
+    file_path = os.path.join(temp_dir, "main.py")
 
     with open(file_path, "w") as f:
       f.write(code)
 
-    compile_process = subprocess.run(
-      ["javac", file_path],
-      capture_output=True,
-      text=True
-    )
+    cmd = [
+      "docker", "run", "--rm",
+      "-i",
+      "--network", "none",
+      "--memory", "256m",
+      "--cpus", "1",
+      "-v", f"{temp_dir}:/app",
+      "python:3.11",
+      "python", "/app/main.py"
+    ]
 
-    if compile_process.returncode != 0:
-      return {"error": compile_process.stderr}
+    return docker_run(cmd, test_input)
 
-    run_process = subprocess.run(
-      ["java", "-cp", dir_path, "Main"],
-      input=test_input,
-      text=True,
-      capture_output=True,
-      timeout=2
-    )
+def execute_cpp(code: str, test_input: str):
+  with tempfile.TemporaryDirectory() as temp_dir:
 
-    return {
-      "output": run_process.stdout.strip(),
-      "error": run_process.stderr.strip()
-    }
+    cpp_path = os.path.join(temp_dir, "main.cpp")
 
-  except subprocess.TimeoutExpired:
-    return {"error": "Execution timed out"}
+    with open(cpp_path, "w") as f:
+      f.write(code)
+
+    cmd = [
+      "docker", "run", "--rm",
+      "-i",
+      "--network", "none",
+      "--memory", "256m",
+      "--cpus", "1",
+      "-v", f"{temp_dir}:/app",
+      "gcc:latest",
+      "bash", "-c",
+      "g++ /app/main.cpp -o /app/main && /app/main"
+    ]
+
+    return docker_run(cmd, test_input)
+    
+def execute_c(code: str, test_input: str):
+  with tempfile.TemporaryDirectory() as temp_dir:
+
+    c_path = os.path.join(temp_dir, "main.c")
+
+    with open(c_path, "w") as f:
+      f.write(code)
+
+    cmd = [
+      "docker", "run", "--rm",
+      "-i",
+      "--network", "none",
+      "--memory", "256m",
+      "--cpus", "1",
+      "-v", f"{temp_dir}:/app",
+      "gcc:latest",
+      "bash", "-c",
+      "gcc /app/main.c -o /app/main && /app/main"
+    ]
+
+    return docker_run(cmd, test_input)
+    
+def execute_js(code: str, test_input: str):
+  with tempfile.TemporaryDirectory() as temp_dir:
+
+    js_path = os.path.join(temp_dir, "main.js")
+
+    with open(js_path, "w") as f:
+      f.write(code)
+
+    cmd = [
+      "docker", "run", "--rm",
+      "-i",
+      "--network", "none",
+      "--memory", "256m",
+      "--cpus", "1",
+      "-v", f"{temp_dir}:/app",
+      "node:20",
+      "node", "/app/main.js"
+    ]
+
+    return docker_run(cmd, test_input)
+  
+def execute_java(code: str, test_input: str):
+  with tempfile.TemporaryDirectory() as temp_dir:
+
+    file_path = os.path.join(temp_dir, "Main.java")
+
+    with open(file_path, "w") as f:
+      f.write(code)
+
+    cmd = [
+      "docker", "run", "--rm",
+      "-i",
+      "--network", "none",
+      "--memory", "512m",
+      "--cpus", "1",
+      "-v", f"{temp_dir}:/app",
+      "eclipse-temurin:17",
+      "bash", "-c",
+      "javac /app/Main.java && java -cp /app Main"
+    ]
+
+    return docker_run(cmd, test_input)
     
 def execute_code(code: str, test_input: str, language: str):
   if language == "python":

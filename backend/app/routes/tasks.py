@@ -11,8 +11,12 @@ def create_task(task: dict):
         "title": task.get("title"),
         "difficulty": task.get("difficulty"),
         "skill": task.get("skill"),
-        "test_cases": task.get("test_cases", []),
-        "time_limit": task.get("time_limit", 1)  # time limit (in seconds)
+
+        "public_test_cases": task.get("public_test_cases", []),
+        "hidden_test_cases": task.get("hidden_test_cases", []),
+
+        "execution_time_limit": task.get("execution_time_limit", 1),  # execution time limit (in seconds)
+        "solve_time_limit": task.get("solve_time_limit", 20)
     }
 
     # required field check
@@ -24,7 +28,7 @@ def create_task(task: dict):
         raise HTTPException(status_code=400, detail="Invalid difficulty (must be Easy, Medium, Hard)")
 
     # test case validation
-    for tc in new_task["test_cases"]:
+    for tc in new_task["public_test_cases"] + new_task["hidden_test_cases"]:
         if "input" not in tc or "output" not in tc:
             raise HTTPException(status_code=400, detail="Each test case must have input and output")
 
