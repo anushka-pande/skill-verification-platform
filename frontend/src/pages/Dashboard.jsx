@@ -43,7 +43,7 @@ function Dashboard(props) {
 
               {localStorage.getItem("role") === "recruiter" && (
               <button onClick={() => setPage("recruiter")}>
-                Recruiter View
+                Recruiter Dashboard
               </button>
               )}
 

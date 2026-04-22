@@ -5,10 +5,15 @@ from sqlalchemy.orm import Session
 from difflib import SequenceMatcher
 from itertools import combinations
 
+import smtplib
+from email.mime.text import MIMEText
+from bson import ObjectId
+
 from app.mongo import (
   submissions_collection, 
   tasks_collection,
-  recruiter_status_collection
+  recruiter_status_collection,
+  recruiter_notes_collection
 )
 from app.routes.auth import get_db
 from app.models import User
@@ -116,12 +121,12 @@ def recruiter_overview(
 
   result = []
 
-  for data in user_stats.values():
+  for uid, data in user_stats.items():
     scores = data["scores"]
 
     avg = sum(scores) / len(scores) if scores else 0
 
-    # Skill level classification
+    # level
     if avg >= 80:
       level = "Advanced"
     elif avg >= 50:
@@ -129,20 +134,51 @@ def recruiter_overview(
     else:
       level = "Beginner"
 
-    # Skill-wise averages
     skill_summary = {
       k: round(sum(v) / len(v), 2)
       for k, v in data["skills"].items()
     }
 
+    # RANKING METRICS
+
+    skill_diversity = len(skill_summary) * 10
+    if skill_diversity > 100:
+      skill_diversity = 100
+
+    submission_score = len(scores) * 10
+    if submission_score > 100:
+      submission_score = 100
+
+    consistency = 100 - (max(scores) - min(scores)) if scores else 0
+    if consistency < 0:
+      consistency = 0
+
+    rank_score = round(
+      avg * 0.60 +
+      skill_diversity * 0.20 +
+      submission_score * 0.10 +
+      consistency * 0.10,
+      2
+    )
+
     result.append({
+      "user_id": uid,
       "name": data["name"],
       "email": data["email"],
       "average_score": round(avg, 2),
       "skill_level": level,
       "total_submissions": len(scores),
-      "skills": skill_summary
+      "skills": skill_summary,
+      "rank_score": rank_score
     })
+
+  result.sort(
+    key=lambda x: x["rank_score"],
+    reverse=True
+  )
+
+  for i, item in enumerate(result):
+    item["rank"] = i + 1
 
   return result
 
@@ -233,3 +269,97 @@ def get_status(user=Depends(verify_recruiter)):
     result[d["candidate_email"]] = d["status"]
 
   return result
+
+@router.post("/recruiter/note")
+def save_note(data: dict, user=Depends(verify_recruiter)):
+  recruiter_notes_collection.update_one(
+    {"email": data["email"]},
+    {"$set": {"note": data["note"]}},
+    upsert=True
+  )
+
+  return {"message": "Note saved"}
+
+@router.get("/recruiter/note/{email}")
+def get_note(email: str, user=Depends(verify_recruiter)):
+  note = recruiter_notes_collection.find_one({"email": email})
+
+  return {
+    "note": note["note"] if note else ""
+  }
+
+
+@router.post("/recruiter/email-shortlisted")
+def email_shortlisted(user=Depends(verify_recruiter)):
+  try:
+    shortlisted = list(
+      recruiter_status_collection.find(
+        {"status": "shortlisted"}
+      )
+    )
+
+    for c in shortlisted:
+      email = c["candidate_email"]
+
+      msg = MIMEText(
+          "Congratulations! You have been shortlisted."
+      )
+
+      msg["Subject"] = "Shortlisted"
+      msg["From"] = "anushkapande04@gmail.com"
+      msg["To"] = email
+
+      server = smtplib.SMTP("smtp.gmail.com", 587)
+      server.starttls()
+      server.login(
+        "anushkapande04@gmail.com",
+        "dtbk plyn zzua gjqp"
+      )
+
+      server.sendmail(
+        msg["From"],
+        email,
+        msg.as_string()
+      )
+
+      server.quit()
+
+    return {"message": "Emails sent successfully"}
+
+  except Exception as e:
+    print("EMAIL ERROR:", str(e))
+    raise HTTPException(
+      status_code=500,
+      detail=str(e)
+    )
+  
+@router.get("/recruiter/submission/{submission_id}")
+def submission_detail(
+  submission_id: str,
+  user=Depends(verify_recruiter)
+):
+  sub = submissions_collection.find_one(
+    {"_id": ObjectId(submission_id)}
+  )
+
+  if not sub:
+    raise HTTPException(
+      status_code=404,
+      detail="Submission not found"
+    )
+
+  return {
+    "id": str(sub["_id"]),
+    "task_id": sub.get("task_id"),
+    "language": sub.get("language"),
+    "code": sub.get("code"),
+    "score": sub.get("final_score", 0),
+    "execution_score": sub.get("execution_score", 0),
+    "quality_score": sub.get("quality_score", 0),
+    "time_score": sub.get("time_score", 0),
+    "date": str(sub.get("created_at")),
+    "details": sub.get("evaluation_details", []),
+    "passed": sub.get("test_cases_passed", 0),
+    "failed": sub.get("test_cases_failed", 0),
+    "total": sub.get("test_cases_total", 0)
+  }

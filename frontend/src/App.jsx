@@ -53,7 +53,7 @@ function App() {
 
   const [recruiterData, setRecruiterData] = useState([])
   const [selectedCandidate, setSelectedCandidate] = useState(null)
-  const [candidateSort, setCandidateSort] = useState("score")
+  const [candidateSort, setCandidateSort] = useState("rank")
   const [skillFilter, setSkillFilter] = useState("")
   const [candidateStatus, setCandidateStatus] = useState({})
   const [plagiarismData, setPlagiarismData] = useState([])
