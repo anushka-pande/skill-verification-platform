@@ -49,17 +49,31 @@ function Dashboard(props) {
 
               {/* Submissions Button */}
               <button
-                onClick={() => setPage("submissions")}
+                onClick={() => {
+                  setProfileOpen(false)
+                  setPage("submissions")}
+                }
                 className="text-slate-300 hover:text-white transition"
               >
                 Submissions
+              </button>
+
+              {/* Settings */}
+              <button
+                onClick={() => {
+                  setProfileOpen(false)
+                  setPage("settings")}
+                }
+                className="text-slate-300 hover:text-white transition"
+              >
+                Settings
               </button>
 
               {/* Profile Dropdown */}
               <div className="relative">
                 <button
                   onClick={() => setProfileOpen(!profileOpen)}
-                  className="bg-slate-800 px-4 py-2 rounded-lg hover:bg-slate-700 flex items-center gap-2"
+                  className="bg-slate-800 px-4 py-2 rounded-lg hover:bg-slate-700"
                 >
                   Profile ▼
                 </button>
@@ -68,8 +82,8 @@ function Dashboard(props) {
                   <div className="absolute right-0 mt-2 w-40 bg-slate-800 rounded-lg shadow-lg border border-slate-700 z-50">
                     <button
                       onClick={() => {
-                      setPage("profile")
-                      setProfileOpen(false)
+                        setPage("profile")
+                        setProfileOpen(false)
                       }}
                       className="block w-full text-left px-4 py-2 hover:bg-slate-700"
                     >
@@ -78,20 +92,10 @@ function Dashboard(props) {
 
                     <button
                       onClick={() => {
-                      setPage("settings")
-                      setProfileOpen(false)
-                      }}
-                      className="block w-full text-left px-4 py-2 hover:bg-slate-700"
-                    >
-                      Settings
-                    </button>
-
-                    <button
-                      onClick={() => {
-                      localStorage.removeItem("user_id")
-                      localStorage.removeItem("user_email")
-                      setPage("auth")
-                      setProfileOpen(false)
+                        localStorage.removeItem("user_id")
+                        localStorage.removeItem("user_email")
+                        setPage("auth")
+                        setProfileOpen(false)
                       }}
                       className="block w-full text-left px-4 py-2 text-red-400 hover:bg-slate-700"
                     >

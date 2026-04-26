@@ -31,7 +31,9 @@ function App() {
   const [difficulty, setDifficulty] = useState("All")
   const [code, setCode] = useState("")
   const [result, setResult] = useState(null)
-  const [language, setLanguage] = useState("python")
+  const [language, setLanguage] = useState(
+    localStorage.getItem("default_language") || "python"
+  )
 
   const [profileOpen, setProfileOpen] = useState(false)
   const [profileData, setProfileData] = useState(null)
@@ -199,6 +201,10 @@ function App() {
 
   }, [page])
 
+  useEffect(() => {
+    setProfileOpen(false)
+  }, [page])
+
   return (
     <>
       {page === "auth" && (
@@ -310,7 +316,11 @@ function App() {
       )}
 
       {page === "settings" && (
-        <SettingsPage setPage={setPage} />
+        <SettingsPage
+          setPage={setPage}
+          language={language}
+          setLanguage={setLanguage}
+        />
       )}
     </>
   )

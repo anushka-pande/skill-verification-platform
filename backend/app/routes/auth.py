@@ -168,3 +168,22 @@ def set_role(data: dict, db: Session = Depends(get_db)):
 
   return {"message": "Role updated"}
 
+@router.post("/change-password")
+def change_password(data: dict, db: Session = Depends(get_db)):
+  user_id = data.get("user_id")
+  current_password = data.get("current_password")
+  new_password = data.get("new_password")
+
+  user = db.query(User).filter(User.id == user_id).first()
+
+  if not user:
+    raise HTTPException(status_code=404, detail="User not found")
+
+  if not verify_password(current_password, user.password):
+    raise HTTPException(status_code=400, detail="Current password incorrect")
+
+  user.password = hash_password(new_password)
+
+  db.commit()
+
+  return {"message": "Password updated successfully"}

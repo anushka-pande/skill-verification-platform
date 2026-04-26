@@ -62,11 +62,18 @@ def get_submissions(user_id: int):
       status = "Failed"
         
     cleaned.append({
-      "id": str(s["_id"]),   
+      "id": str(s["_id"]),
       "task_id": s.get("task_id"),
       "score": s.get("final_score", 0),
-      "date": str(s.get("created_at")),  
-      "status": status
+      "date": str(s.get("created_at")),
+      "status": status,
+      "language": s.get("language", "python"),
+
+      "code": s.get("code", ""),
+      "execution_score": s.get("execution_score", 0),
+      "quality_score": s.get("quality_score", 0),
+      "time_score": s.get("time_score", 0),
+      "details": s.get("evaluation_details", [])
     })
 
   return cleaned
