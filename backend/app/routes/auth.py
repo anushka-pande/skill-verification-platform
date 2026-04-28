@@ -1,3 +1,6 @@
+import os
+from dotenv import load_dotenv
+
 from fastapi import APIRouter, HTTPException, Depends
 from jose import jwt
 from datetime import datetime, timedelta
@@ -11,6 +14,8 @@ import random
 
 import smtplib
 from email.mime.text import MIMEText
+
+load_dotenv()
 
 router = APIRouter()
 
@@ -134,7 +139,7 @@ def verify_otp(data: dict, db: Session = Depends(get_db)):
 
 def send_otp_email(to_email, otp):
   sender_email = "anushkapande04@gmail.com"
-  app_password = "dtbk plyn zzua gjqp"
+  app_password = os.getenv("EMAIL_PASSWORD").replace(" ", "")
 
   subject = "Your OTP Verification Code"
   body = f"Your OTP is: {otp}"

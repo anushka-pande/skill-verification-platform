@@ -28,6 +28,9 @@ function App() {
   const [tasks, setTasks] = useState([])
   const [selectedTask, setSelectedTask] = useState(null)
 
+  const [aiData, setAiData] = useState(null)
+  const [aiLoading, setAiLoading] = useState(false)
+
   const [difficulty, setDifficulty] = useState("All")
   const [code, setCode] = useState("")
   const [result, setResult] = useState(null)
@@ -130,18 +133,28 @@ function App() {
 
   useEffect(() => {
     if (page === "dashboard") {
+
       const url =
         difficulty === "All"
           ? "http://127.0.0.1:8000/tasks"
           : `http://127.0.0.1:8000/tasks?difficulty=${difficulty}`
 
-      axios
-        .get(url)
-        .then(res => {
-          console.log("TASKS:", res.data) // DEBUG
-          setTasks(res.data)
-        })
-        .catch(err => console.error(err))
+      const userId = localStorage.getItem("user_id")
+
+      setAiLoading(true)
+
+      Promise.all([
+        axios.get(url),
+        axios.get(
+          `http://127.0.0.1:8000/ai-insights/${userId}`
+        )
+      ])
+      .then(([tasksRes, aiRes]) => {
+        setTasks(tasksRes.data)
+        setAiData(aiRes.data)
+      })
+      .catch(err => console.error(err))
+      .finally(() => setAiLoading(false))
     }
   }, [page, difficulty])
 
@@ -241,6 +254,10 @@ function App() {
           isAdmin={isAdmin}
           profileOpen={profileOpen}
           setProfileOpen={setProfileOpen}
+          aiData={aiData}
+          setAiData={setAiData}
+          aiLoading={aiLoading}
+          setAiLoading={setAiLoading}
         />
       )}
 
