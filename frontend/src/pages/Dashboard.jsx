@@ -5,7 +5,8 @@ function Dashboard(props) {
   const [aiOpen, setAiOpen] = useState(false)
   const [coachText, setCoachText] = useState("")
   const [coachLoading, setCoachLoading] = useState(false)
-  const role = localStorage.getItem("role")
+  const [search, setSearch] = useState("")
+  const role = sessionStorage.getItem("role")
   const {
     tasks,
     setPage,
@@ -21,188 +22,212 @@ function Dashboard(props) {
     setAiLoading
   } = props
 
+  const filteredTasks = tasks.filter(task =>
+    task.title.toLowerCase().includes(search.toLowerCase())
+  )
+
   return (
     <>
       <div className="min-h-screen bg-slate-900 p-10">
-          <div className="flex justify-between items-center mb-10 border-b border-slate-700 pb-4">
-            <h1 className="text-2xl font-bold text-purple-400">
-              Provenix
-            </h1>
+        <div className="sticky top-0 z-40 backdrop-blur-xl bg-slate-950/70 border-b border-slate-800 px-6 py-4">
+          <div className="flex flex-col xl:flex-row lg:items-center lg:justify-between gap-4">
 
-            <p className="text-sm text-slate-400">
-              {role === "recruiter"
-                ? "Assessment Catalog"
-                : "Coding Dashboard"}
-            </p>
+            {/* LEFT */}
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                Provenix
+              </h1>
 
-            <div className="flex items-center gap-4">
-              {/* Difficulty Filter */}
+              <p className="text-sm text-slate-400 mt-1">
+                {role === "recruiter"
+                  ? "Assessment Catalog"
+                  : "Coding Dashboard"}
+              </p>
+            </div>
+
+            {/* CENTER SEARCH */}
+            <div className="flex-1 max-w-xl">
+              <input
+                type="text"
+                placeholder="Search tasks..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+            </div>
+
+            {/* RIGHT */}
+            <div className="flex flex-wrap lg:flex-nowrap items-center gap-2 w-full lg:w-auto">
               <select
                 value={difficulty}
                 onChange={(e) => setDifficulty(e.target.value)}
-                className="p-2 rounded bg-slate-800 text-white border border-slate-700"
+                className="bg-slate-900 border border-slate-700 px-4 py-3 rounded-xl text-white min-w-[100px]"
               >
-                <option value="All">All</option>
-                <option value="Easy">Easy</option>
-                <option value="Medium">Medium</option>
-                <option value="Hard">Hard</option>
+                <option>All</option>
+                <option>Easy</option>
+                <option>Medium</option>
+                <option>Hard</option>
               </select>
 
-              {/* Add Task Button */}
-              {isAdmin && (
+              {role === "candidate" && (
                 <button
-                  onClick={() => setPage("add-task")}
-                  className="text-slate-300 hover:text-white transition"
+                  onClick={() => setPage("submissions")}
+                  className="px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 hover:bg-slate-800"
                 >
-                  Add Task
+                  Submissions
                 </button>
               )}
 
-              {/* Submissions Button */}
-              <button
-                onClick={() => {
-                  setProfileOpen(false)
+              {role === "recruiter" && (
+                <>
+                  <button
+                    onClick={() => setPage("add-task")}
+                    className="px-4 py-3 rounded-xl bg-purple-600 hover:bg-purple-500"
+                  >
+                    Add Task
+                  </button>
 
-                  if (role === "recruiter") {
-                    setPage("recruiter")
-                  } else {
-                    setPage("submissions")
-                  }
-                }}
-                className="text-slate-300 hover:text-white transition"
-              >
-                {role === "recruiter"
-                  ? "Candidate Reports"
-                  : "Submissions"}
-              </button>
+                  <button
+                    onClick={() => setPage("recruiter")}
+                    className="px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 hover:bg-slate-800"
+                  >
+                    Reports
+                  </button>
+                </>
+              )}
 
-              {/* Settings */}
               <button
-                onClick={() => {
-                  setProfileOpen(false)
-                  setPage("settings")}
-                }
-                className="text-slate-300 hover:text-white transition"
+                onClick={() => setPage("settings")}
+                className="px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 hover:bg-slate-800"
               >
                 Settings
               </button>
 
-              {/* Profile Dropdown */}
+              {/* PROFILE */}
               <div className="relative">
                 <button
                   onClick={() => setProfileOpen(!profileOpen)}
-                  className="bg-slate-800 px-4 py-2 rounded-lg hover:bg-slate-700"
+                  className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700"
                 >
                   Profile ▼
                 </button>
 
                 {profileOpen && (
-                  <div className="absolute right-0 mt-2 w-40 bg-slate-800 rounded-lg shadow-lg border border-slate-700 z-50">
+                  <div className="absolute right-0 mt-2 w-44 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50">
+
                     <button
                       onClick={() => {
                         setPage("profile")
                         setProfileOpen(false)
                       }}
-                      className="block w-full text-left px-4 py-2 hover:bg-slate-700"
+                      className="w-full text-left px-4 py-3 hover:bg-slate-700"
                     >
                       My Profile
                     </button>
 
                     <button
                       onClick={() => {
-                        localStorage.removeItem("user_id")
-                        localStorage.removeItem("user_email")
+                        sessionStorage.clear()
                         setPage("auth")
-                        setProfileOpen(false)
                       }}
-                      className="block w-full text-left px-4 py-2 text-red-400 hover:bg-slate-700"
+                      className="w-full text-left px-4 py-3 text-red-400 hover:bg-slate-700"
                     >
                       Logout
                     </button>
+
                   </div>
                 )}
               </div>
+
             </div>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tasks.map((task, index) => (
-              <div
-              key={index}
-              className="bg-slate-800 p-6 rounded-xl shadow-md hover:shadow-xl hover:scale-[1.03] transition duration-300"
-              >
-                <div className="space-y-2">
-                  <h2 className="text-xl font-bold text-white mb-2">
-                    {task.title}
-                  </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredTasks.map((task, index) => (
+            <div
+            key={index}
+            className="bg-slate-800 p-6 rounded-xl shadow-md hover:shadow-xl hover:scale-[1.03] transition duration-300"
+            >
+              <div className="space-y-2">
+                <h2 className="text-xl font-bold text-white mb-2">
+                  {task.title}
+                </h2>
 
-                  <span
-                  className={`inline-block px-3 py-1 text-xs rounded-full ${
-                    task.difficulty === "Easy"
-                    ? "bg-green-500/20 text-green-400"
-                    : task.difficulty === "Medium"
-                    ? "bg-yellow-500/20 text-yellow-400"
-                    : "bg-red-500/20 text-red-400"
-                  }`}
-                  >
-                    {task.difficulty}
-                  </span>
+                <span
+                className={`inline-block px-3 py-1 text-xs rounded-full ${
+                  task.difficulty === "Easy"
+                  ? "bg-green-500/20 text-green-400"
+                  : task.difficulty === "Medium"
+                  ? "bg-yellow-500/20 text-yellow-400"
+                  : "bg-red-500/20 text-red-400"
+                }`}
+                >
+                  {task.difficulty}
+                </span>
 
-                  <p className="text-slate-400">
-                    Skill: {task.skill}
-                  </p>
+                <p className="text-slate-400">
+                  Skill: {task.skill}
+                </p>
 
-                  <button
-                    onClick={() => {
-                      console.log("CLICKED", task)
-                      setSelectedTask(task)
+                <button
+                  onClick={() => {
+                    console.log("CLICKED", task)
+                    setSelectedTask(task)
+
+                    if (role === "recruiter") {
+                      setPage("task-preview")
+                    } else {
                       setPage("editor")
-                    }}
-                    className="mt-4 w-full bg-gradient-to-r from-purple-500 to-blue-500 px-4 py-2 rounded-lg hover:opacity-90 transition font-semibold"
-                  >
-                    {role === "recruiter" ? "View Task" : "Solve"}
-                  </button>
-                </div>
+                    }
+                  }}
+                  className="mt-4 w-full bg-gradient-to-r from-purple-500 to-blue-500 px-4 py-2 rounded-lg hover:opacity-90 transition font-semibold"
+                >
+                  {role === "recruiter" ? "View Task" : "Solve"}
+                </button>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
+        </div>
 
-          {tasks.length === 0 && (
-            <p className="text-slate-400 text-center col-span-full">
-              No tasks found for selected difficulty.
-            </p>
-          )}
+        {tasks.length === 0 && (
+          <p className="text-slate-400 text-center col-span-full">
+            No tasks found for selected difficulty.
+          </p>
+        )}
 
-        <button
-          onClick={() => {
-            setAiOpen(true)
-            setAiLoading(true)
+        {role === "candidate" && 
+          <button
+            onClick={() => {
+              setAiOpen(true)
+              setAiLoading(true)
 
-            axios.post(
-              "http://127.0.0.1:8000/ai-coach",
-              {
-                stats: aiData
-              }
-            )
-            .then(res => {
-              setCoachText(res.data.message)
+              axios.post(
+                "http://127.0.0.1:8000/ai-coach",
+                {
+                  stats: aiData
+                }
+              )
+              .then(res => {
+                setCoachText(res.data.message)
 
-              setTimeout(() => {
+                setTimeout(() => {
+                  setAiLoading(false)
+                }, 900)
+              })
+              .catch(() => {
+                setCoachText("Unable to generate coach advice right now.")
+
                 setAiLoading(false)
-              }, 900)
-            })
-            .catch(() => {
-              setCoachText("Unable to generate coach advice right now.")
+              })
+            }}
+            className="fixed bottom-6 right-6 w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 text-white text-2xl shadow-xl hover:scale-110 transition z-50"
+          >
+            AI
+          </button>
+        }
 
-              setAiLoading(false)
-            })
-          }}
-          className="fixed bottom-6 right-6 w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 text-white text-2xl shadow-xl hover:scale-110 transition z-50"
-        >
-          AI
-        </button>
-
-        {aiOpen && (
+        {role === "candidate" && aiOpen && (
           <div className="fixed top-0 right-0 h-full w-[380px] bg-slate-800 z-50 shadow-2xl p-6 overflow-y-auto">
             {aiLoading ? (
               <div className="space-y-4 animate-pulse mt-8">

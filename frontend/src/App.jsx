@@ -11,6 +11,7 @@ import AddTaskPage from "./pages/AddTaskPage"
 import RecruiterPage from "./pages/RecruiterPage"
 import ChooseRole from "./pages/chooseRole"
 import SettingsPage from "./pages/SettingsPage"
+import TaskPreview from "./pages/TaskPreview"
 
 function App() {
   const [isLogin, setIsLogin] = useState(true)
@@ -35,11 +36,10 @@ function App() {
   const [code, setCode] = useState("")
   const [result, setResult] = useState(null)
   const [language, setLanguage] = useState(
-    localStorage.getItem("default_language") || "python"
+    sessionStorage.getItem("default_language") || "python"
   )
 
   const [profileOpen, setProfileOpen] = useState(false)
-  const [profileData, setProfileData] = useState(null)
 
   const [submissions, setSubmissions] = useState([])
   const [sortType, setSortType] = useState("latest")
@@ -63,9 +63,10 @@ function App() {
   const [candidateStatus, setCandidateStatus] = useState({})
   const [plagiarismData, setPlagiarismData] = useState([])
 
-  const role = localStorage.getItem("role")
+  const role = sessionStorage.getItem("role")
+  const userEmail = sessionStorage.getItem("user_email")
+  const token = sessionStorage.getItem("token")
 
-  const userEmail = localStorage.getItem("user_email")
   const isAdmin = userEmail === "anushkapande04@gmail.com"
 
   const handleSubmit = async () => {
@@ -83,10 +84,10 @@ function App() {
           password
         })
 
-        localStorage.setItem("token", res.data.token)
-        localStorage.setItem("user_id", res.data.user_id)
-        localStorage.setItem("role", res.data.role)
-        localStorage.setItem("user_email", email)
+        sessionStorage.setItem("token", res.data.token)
+        sessionStorage.setItem("user_id", res.data.user_id)
+        sessionStorage.setItem("role", res.data.role)
+        sessionStorage.setItem("user_email", email)
 
         // Clear fields
         setEmail("")
@@ -94,7 +95,7 @@ function App() {
 
         // redirect
         if(res.data.role) {
-          localStorage.setItem("role", res.data.role)
+          sessionStorage.setItem("role", res.data.role)
           if (res.data.role === "recruiter") {
             setPage("recruiter")
           } else {
@@ -139,7 +140,7 @@ function App() {
           ? "http://127.0.0.1:8000/tasks"
           : `http://127.0.0.1:8000/tasks?difficulty=${difficulty}`
 
-      const userId = localStorage.getItem("user_id")
+      const userId = sessionStorage.getItem("user_id")
 
       setAiLoading(true)
 
@@ -160,7 +161,7 @@ function App() {
 
   useEffect(() => {
     if (page === "submissions") {
-      const userId = parseInt(localStorage.getItem("user_id"))
+      const userId = parseInt(sessionStorage.getItem("user_id"))
 
       axios
         .get(`http://127.0.0.1:8000/submissions/${userId}`)
@@ -168,24 +169,6 @@ function App() {
         .catch(err => console.error(err))
     }
   }, [page])
-
-  useEffect(() => {
-    if (page === "profile") {
-      const userId = parseInt(localStorage.getItem("user_id"))
-
-      axios
-        .get(`http://127.0.0.1:8000/profile/${userId}`)
-        .then(res => {
-          console.log("PROFILE DATA:", res.data)  
-          setProfileData(res.data)
-        })
-        .catch(err => {
-          console.error("PROFILE ERROR:", err)    
-        })
-    }
-  }, [page])
-
-  const token = localStorage.getItem("token")
 
   useEffect(() => {
     if (page === "recruiter") {
@@ -274,10 +257,16 @@ function App() {
         />
       )}
 
+      {page === "task-preview" && (
+        <TaskPreview
+          task={selectedTask}
+          setPage={setPage}
+        />
+      )}
+
       {page === "profile" && (
         <ProfilePage
           setPage={setPage}
-          profileData={profileData}
         />
       )}
 

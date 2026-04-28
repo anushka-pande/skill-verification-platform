@@ -29,18 +29,18 @@ function SubmissionsPage(props) {
     return 0
   })
 
-  const total = submissions.length
-  const passed = submissions.filter(s => s.status === "Passed").length
-  const failed = submissions.filter(s => s.status === "Failed").length
-  const best = submissions.length
-    ? Math.max(...submissions.map(s => s.score || 0))
+  const total = safeSubmissions.length
+  const passed = safeSubmissions.filter(s => s.status === "Passed").length
+  const failed = safeSubmissions.filter(s => s.status === "Failed").length
+  const best = safeSubmissions.length
+    ? Math.max(...safeSubmissions.map(s => s.score || 0))
     : 0
 
-  const avg = submissions.length
+  const avg = safeSubmissions.length
     ? (
-        submissions.reduce(
+        safeSubmissions.reduce(
           (sum, s) => sum + (s.score || 0), 0
-        ) / submissions.length
+        ) / safeSubmissions.length
       ).toFixed(1)
     : 0
 

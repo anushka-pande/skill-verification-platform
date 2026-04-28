@@ -7,6 +7,7 @@ function EditorPage(props) {
   const [runLoading, setRunLoading] = useState(false)
   const [submitLoading, setSubmitLoading] = useState(false)
   const [timeLeft, setTimeLeft] = useState(0)
+  const [hint, setHint] = useState("")
   const {
     selectedTask,
     setPage,
@@ -60,7 +61,7 @@ function EditorPage(props) {
           </h1>
 
           <span className="text-slate-400">
-            {localStorage.getItem("user_email")}
+            {sessionStorage.getItem("user_email")}
           </span>
         </div>
 
@@ -132,16 +133,26 @@ function EditorPage(props) {
             onClick={async () => {
               try {
                 setRunLoading(true)
+                setResult(null)
+
+                console.log("TASK=", selectedTask)
+                console.log("EXPECTED=", selectedTask.public_test_cases?.[0]?.output)
 
                 const res = await axios.post(
-                  "http://127.0.0.1:8000/run-code",
-                  {
-                    code,
-                    language,
-                    input: customInput
-                  }
-                )
+                "http://127.0.0.1:8000/run-code", 
+                {
+                  code,
+                  language,
+                  input: customInput || selectedTask.public_test_cases?.[0]?.input ||
+                    selectedTask.test_cases?.[0]?.output ||
+                    "",
+                  expected:
+                    selectedTask.public_test_cases?.[0]?.output || 
+                    selectedTask.test_cases?.[0]?.input ||
+                    ""
+                })
 
+                console.log("RUN RESPONSE = ", res.data)
                 setResult({
                   runOnly: true,
                   ...res.data
@@ -163,7 +174,12 @@ function EditorPage(props) {
               try {
                 setSubmitLoading(true)
 
-                const userId = localStorage.getItem("user_id")
+                const userId = parseInt(sessionStorage.getItem("user_id"))
+
+                if (!userId) {
+                  alert("User session expired. Please login again.")
+                  return
+                }
 
                 const submitRes = await axios.post(
                   "http://127.0.0.1:8000/submit-code",
@@ -184,7 +200,13 @@ function EditorPage(props) {
                 setResult(execRes.data)
 
               } catch (err) {
-                alert("Submission failed")
+                console.log(err)
+                console.log(err.response?.data)
+                alert(
+                  err.response?.data?.detail ||
+                  err.message ||
+                  "Submission failed"
+                )
               } finally {
                 setSubmitLoading(false)
               }
@@ -212,6 +234,11 @@ function EditorPage(props) {
             <p className="text-slate-400 mt-2">
               Execution Time: {result.execution_time}s
             </p>
+            {result.hint && (
+              <div className="mt-3 bg-yellow-500/10 border border-yellow-400/30 text-yellow-300 px-3 py-2 rounded-lg">
+                ⚠ Hint: {result.hint}
+              </div>
+            )}
           </div>
         )}
 
@@ -282,16 +309,27 @@ function EditorPage(props) {
                       </p>
                     ) : (
                       <>
-                        <p><strong>Actual:</strong> {d.actual}</p>
+                        <div>
+                          <strong>Actual:</strong> 
+                          <pre className="mt-1 whitespace-pre-wrap text-slate-300">
+                            {d.actual}
+                          </pre> 
+                        </div>
                         <p
                           className={
                             d.status === "passed"
-                            ? "text-green-400 font-semibold"
-                            : "text-red-400 font-semibold"
+                              ? "text-green-400 font-semibold"
+                              : "text-red-400 font-semibold"
                           }
                         >
                           {d.status.toUpperCase()}
                         </p>
+
+                        {d.hint && (
+                          <div className="mt-3 bg-yellow-500/10 border border-yellow-400/30 text-yellow-300 px-3 py-2 rounded-lg">
+                            ⚠ Hint: {d.hint}
+                          </div>
+                        )}
                       </>
                     )}
                   </>
