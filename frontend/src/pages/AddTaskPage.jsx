@@ -1,18 +1,30 @@
+import { useState } from "react"
 import axios from "axios"
+import toast from "react-hot-toast"
  
 function AddTaskPage(props) {
   const {
     setPage,
     title,
     setTitle,
+    description,
+    setDescription,
     skill,
     setSkill,
-    executionTime,
-    setExecutionTime,
-    solveTime,
-    setSolveTime,
+    executionTimeLimit,
+    setExecutionTimeLimit,
+    solveTimeLimit,
+    setSolveTimeLimit,
     difficulty,
     setDifficulty,
+    constraints,
+    setConstraints,
+    outputFormat,
+    setOutputFormat,
+    edgeCases,
+    setEdgeCases,
+    examples,
+    setExamples,
     publicCases,
     setPublicCases,
     hiddenCases,
@@ -43,6 +55,14 @@ function AddTaskPage(props) {
           onChange={(e) => setTitle(e.target.value)}
         />
 
+        <textarea
+          rows="4"
+          placeholder="Task Description"
+          value={description}
+          className="w-full p-3 mb-3 bg-slate-700 rounded"
+          onChange={(e) => setDescription(e.target.value)}
+        />
+
         {/* Difficulty */}
         <select
           value={difficulty}
@@ -63,6 +83,87 @@ function AddTaskPage(props) {
           onChange={(e) => setSkill(e.target.value)}
         />
 
+        {/* Constraints */}
+        <textarea
+          rows="3"
+          placeholder="Constraints (one per line)"
+          value={constraints}
+          className="w-full p-3 mb-3 bg-slate-700 rounded"
+          onChange={(e) => setConstraints(e.target.value)}
+        />
+
+        {/* Output format */}
+        <textarea
+          rows="2"
+          placeholder="Output Format"
+          value={outputFormat}
+          className="w-full p-3 mb-3 bg-slate-700 rounded"
+          onChange={(e) => setOutputFormat(e.target.value)}
+        />
+
+        {/* Edge cases */}
+        <textarea
+          rows="3"
+          placeholder="Edge Cases (one per line)"
+          value={edgeCases}
+          className="w-full p-3 mb-3 bg-slate-700 rounded"
+          onChange={(e) => setEdgeCases(e.target.value)}
+        />
+
+        {/* Examples */}
+        <h2 className="text-lg text-cyan-400 mb-3">Examples</h2>
+
+          {examples.map((ex, index) => (
+            <div key={index} className="bg-slate-800 p-4 rounded-xl mb-4 space-y-3">
+
+              <input
+                placeholder="Example Input"
+                value={ex.input}
+                className="w-full p-3 bg-slate-700 rounded"
+                onChange={(e) => {
+                  const updated = [...examples]
+                  updated[index].input = e.target.value
+                  setExamples(updated)
+                }}
+              />
+
+              <input
+                placeholder="Expected Output"
+                value={ex.output}
+                className="w-full p-3 bg-slate-700 rounded"
+                onChange={(e) => {
+                  const updated = [...examples]
+                  updated[index].output = e.target.value
+                  setExamples(updated)
+                }}
+              />
+
+              <textarea
+                rows="2"
+                placeholder="Explanation (optional)"
+                value={ex.explanation}
+                className="w-full p-3 bg-slate-700 rounded"
+                onChange={(e) => {
+                  const updated = [...examples]
+                  updated[index].explanation = e.target.value
+                  setExamples(updated)
+                }}
+              />
+            </div>
+          ))}
+
+          <button
+            onClick={() =>
+              setExamples([
+                ...examples,
+                { input: "", output: "", explanation: "" }
+              ])
+            }
+            className="bg-cyan-600 px-4 py-2 rounded-lg"
+          >
+            + Add Example
+          </button>
+
         {/* Execution time Limit */}
         <div className="mb-3">
           <label className="block text-sm text-slate-300 mb-2">
@@ -70,9 +171,9 @@ function AddTaskPage(props) {
           </label>
 
           <select
-            value={executionTime}
+            value={executionTimeLimit}
             className="w-full p-3 bg-slate-700 rounded"
-            onChange={(e) => setExecutionTime(Number(e.target.value))}
+            onChange={(e) => setExecutionTimeLimit(Number(e.target.value))}
           >
             <option value={1}>1 second</option>
             <option value={2}>2 seconds</option>
@@ -87,9 +188,9 @@ function AddTaskPage(props) {
             </label>
 
             <select
-              value={solveTime}
+              value={solveTimeLimit}
               className="w-full p-3 bg-slate-700 rounded"
-              onChange={(e) => setSolveTime(Number(e.target.value))}
+              onChange={(e) => setSolveTimeLimit(Number(e.target.value))}
             >
               <option value={15}>15 min</option>
               <option value={20}>20 min</option>
@@ -201,28 +302,35 @@ function AddTaskPage(props) {
               onClick={async () => {
                 try {
                   if (!difficulty) {
-                    alert("Please select difficulty")
+                    toast.error("Please select difficulty")
                     return
                   }
 
                   await axios.post("http://127.0.0.1:8000/tasks", {
                     title,
+                    description,
                     difficulty,
                     skill,
-                    execution_time_limit: executionTime,
-                    solve_time_limit: solveTime,
+                    execution_time_limit: executionTimeLimit,
+                    solve_time_limit: solveTimeLimit,
                     public_test_cases: publicCases,
-                    hidden_test_cases: hiddenCases
+                    hidden_test_cases: hiddenCases,
+                    constraints: constraints.split("\n").filter(Boolean),
+                    output_format: outputFormat,
+                    edge_cases: edgeCases.split("\n").filter(Boolean),
+                    examples
                   })
 
                   setTaskSuccess(true)
+                  toast.success("Task created successfully")
 
                   setTimeout(() => setTaskSuccess(false), 3000)
 
                   setTitle("")
+                  setDescription("")
                   setSkill("")
-                  setExecutionTime(1)
-                  setSolveTime(20)
+                  setExecutionTimeLimit(1)
+                  setSolveTimeLimit(20)
                   setDifficulty("")
                   setPublicCases([
                     { input: "", output: "" }
@@ -230,10 +338,16 @@ function AddTaskPage(props) {
                   setHiddenCases([
                     { input: "", output: "" }
                   ])
+                  setConstraints("")
+                  setOutputFormat("")
+                  setEdgeCases("")
+                  setExamples([
+                    { input: "", output: "", explanation: ""}
+                  ])
 
                 } catch (err) {
                     console.error("FULL ERROR:", err)
-                    alert(err.response?.data?.detail || "Error creating task")
+                    toast.error(err.response?.data?.detail || "Error creating task")
                   }
               }}
               className="w-full md:w-auto 

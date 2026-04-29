@@ -13,7 +13,7 @@ from app.mongo import (
   submissions_collection, 
   tasks_collection,
   recruiter_status_collection,
-  recruiter_notes_collection
+  recruiter_notes_collection,
 )
 from app.routes.auth import get_db
 from app.models import User
@@ -183,46 +183,109 @@ def recruiter_overview(
   return result
 
 @router.get("/recruiter/plagiarism")
-def plagiarism_report(user=Depends(verify_recruiter)):
-
+def plagiarism_report(
+  db: Session = Depends(get_db),
+  user=Depends(verify_recruiter)
+):
+  # Mongo submissions
   submissions = list(submissions_collection.find({}))
 
-  suspicious = []
+  # PostgreSQL users
+  users = db.query(User).all()
 
+  # Fast lookup map
+  user_map = {}
+
+  for u in users:
+    user_map[u.id] = {
+      "name": u.name,
+      "email": u.email
+    }
+
+  suspicious = []
   grouped = {}
 
-  # group by task + language
+  # Group by task + language
   for s in submissions:
-    key = (s.get("task_id"), s.get("language"))
+    key = (
+      s.get("task_id"),
+      s.get("language")
+    )
 
     if key not in grouped:
       grouped[key] = []
 
     grouped[key].append(s)
 
+  # Compare submissions pairwise
   for key, subs in grouped.items():
     task_id, language = key
 
     for a, b in combinations(subs, 2):
-
+      # same user skip
       if a["user_id"] == b["user_id"]:
         continue
 
-      code1 = normalize_code(a.get("code", ""))
-      code2 = normalize_code(b.get("code", ""))
+      code1 = normalize_code(
+        a.get("code", "")
+      )
 
-      similarity = SequenceMatcher(None, code1, code2).ratio() * 100
+      code2 = normalize_code(
+        b.get("code", "")
+      )
+
+      similarity = (
+        SequenceMatcher(
+          None,
+          code1,
+          code2
+        ).ratio()
+        * 100
+      )
 
       if similarity >= 80:
+        user1_id = a["user_id"]
+        user2_id = b["user_id"]
+
+        user1 = user_map.get(
+          user1_id,
+          {
+            "name": f"User {user1_id}",
+            "email": ""
+          }
+        )
+
+        user2 = user_map.get(
+          user2_id,
+          {
+            "name": f"User {user2_id}",
+            "email": ""
+          }
+        )
+
         suspicious.append({
           "task_id": task_id,
           "language": language,
-          "user1": a["user_id"],
-          "user2": b["user_id"],
-          "similarity": round(similarity, 2)
+
+          "user1": user1_id,
+          "user2": user2_id,
+
+          "user1_name": user1["name"],
+          "user2_name": user2["name"],
+
+          "user1_email": user1["email"],
+          "user2_email": user2["email"],
+
+          "similarity": round(
+            similarity,
+            2
+          )
         })
 
-  suspicious.sort(key=lambda x: x["similarity"], reverse=True)
+  suspicious.sort(
+    key=lambda x: x["similarity"],
+    reverse=True
+  )
 
   return suspicious
 

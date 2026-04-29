@@ -1,4 +1,5 @@
 import { Eye, EyeOff } from "lucide-react"
+import toast from "react-hot-toast"
 import axios from "axios"
 
 function AuthPage(props) {
@@ -154,7 +155,7 @@ function AuthPage(props) {
                             otp
                         })
 
-                        alert("Email verified successfully")
+                        toast.success("Email verified successfully")
 
                         setShowOtpInput(false)
                         setIsLogin(true)
@@ -162,7 +163,7 @@ function AuthPage(props) {
                         setOtp("")
 
                       } catch (err) {
-                        alert(err.response?.data?.detail || "Invalid OTP")
+                        toast.error(err.response?.data?.detail || "Invalid OTP")
                       }
                   }}
                   className="mt-2 w-full bg-green-500 p-2 rounded"

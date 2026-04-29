@@ -45,7 +45,14 @@ function App() {
   const [sortType, setSortType] = useState("latest")
 
   const [title, setTitle] = useState("")
+  const [description, setDescription] = useState("")
   const [skill, setSkill] = useState("")
+  const [constraints, setConstraints] = useState("")
+  const [outputFormat, setOutputFormat] = useState("")
+  const [edgeCases, setEdgeCases] = useState("")
+  const [examples, setExamples] = useState([
+    { input: "", output: "", explanation: ""}
+  ])
   const [executionTimeLimit, setExecutionTimeLimit] = useState(1)
   const [solveTimeLimit, setSolveTimeLimit] = useState(20)
   const [publicCases, setPublicCases] = useState([
@@ -282,20 +289,43 @@ function App() {
       {page === "add-task" && isAdmin && (
         <AddTaskPage
           setPage={setPage}
+
           title={title}
           setTitle={setTitle}
+
+          description={description}
+          setDescription={setDescription}
+
           skill={skill}
           setSkill={setSkill}
+
+          constraints={constraints}
+          setConstraints={setConstraints}
+
+          outputFormat={outputFormat}
+          setOutputFormat={setOutputFormat}
+
+          edgeCases={edgeCases}
+          setEdgeCases={setEdgeCases}
+
+          examples={examples}
+          setExamples={setExamples}
+
           executionTimeLimit={executionTimeLimit}
           setExecutionTimeLimit={setExecutionTimeLimit}
+
           solveTimeLimit={solveTimeLimit}
           setSolveTimeLimit={setSolveTimeLimit}
+
           difficulty={difficulty}
           setDifficulty={setDifficulty}
+
           publicCases={publicCases}
           setPublicCases={setPublicCases}
+
           hiddenCases={hiddenCases}
           setHiddenCases={setHiddenCases}
+
           taskSuccess={taskSuccess}
           setTaskSuccess={setTaskSuccess}
         />

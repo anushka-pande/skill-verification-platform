@@ -1,5 +1,6 @@
 import { Star } from "lucide-react"
 import { useState, useEffect } from "react"
+import toast from "react-hot-toast"
 import axios from "axios"
 import { 
   BarChart, Bar, 
@@ -18,7 +19,7 @@ function RecruiterPage(props) {
   const [selectedSubmission, setSelectedSubmission] = useState(null)
   const [submissionDetail, setSubmissionDetail] = useState(null)
   const perPage = 5
-  const token = localStorage.getItem("token")
+  const token = sessionStorage.getItem("token")
   const {
     setPage,
     recruiterData,
@@ -138,6 +139,8 @@ function RecruiterPage(props) {
     document.body.removeChild(link)
 
     URL.revokeObjectURL(url)
+
+    toast.success("Report downloaded")
   }
 
   const skillChartData = selectedCandidate
@@ -183,6 +186,8 @@ function RecruiterPage(props) {
     a.click()
 
     URL.revokeObjectURL(url)
+
+    toast.success("All candidates exported")
   }
 
   useEffect(() => {
@@ -192,7 +197,7 @@ function RecruiterPage(props) {
       try {
         setLoadingDetails(true)
 
-        const token = localStorage.getItem("token")
+        const token = sessionStorage.getItem("token")
 
         // submissions
         const res = await axios.get(
@@ -266,10 +271,10 @@ function RecruiterPage(props) {
                       }
                     }
                   )
-                  alert(res.data.message)
+                  toast.success(res.data.message)
                 } catch(err) {
                   console.log(err)
-                  alert(err.response?.data?.detail || err.message)
+                  toast.error(err.response?.data?.detail || err.message)
                 }
               }}
               className="bg-emerald-500 px-4 py-2 rounded-lg"
@@ -619,6 +624,7 @@ function RecruiterPage(props) {
                                   }
                                 }
                               )
+                              toast.success("Note saved")
                             }}
                             className="mt-3 w-full bg-purple-600 hover:bg-purple-700 py-3 rounded-lg font-semibold"
                           >
@@ -766,7 +772,7 @@ function RecruiterPage(props) {
                           },
                           {
                             headers: {
-                              Authorization: `Bearer ${localStorage.getItem("token")}`
+                              Authorization: `Bearer ${sessionStorage.getItem("token")}`
                             }
                           }
                         )
@@ -775,6 +781,7 @@ function RecruiterPage(props) {
                           ...candidateStatus,
                           [selectedCandidate.email]: "shortlisted"
                         })
+                        toast.success("Candidate Shortlisted")
                       }}
                       className={`w-full py-3 rounded-lg font-semibold transition ${
                         candidateStatus[selectedCandidate.email] === "shortlisted"
@@ -797,7 +804,7 @@ function RecruiterPage(props) {
                           },
                           {
                             headers: {
-                              Authorization: `Bearer ${localStorage.getItem("token")}`
+                              Authorization: `Bearer ${sessionStorage.getItem("token")}`
                             }
                           }
                         )
@@ -806,6 +813,7 @@ function RecruiterPage(props) {
                           ...candidateStatus,
                           [selectedCandidate.email]: "rejected"
                         })
+                        toast.success("Candidate Rejected")
                       }}
                       className={`w-full py-3 rounded-lg font-semibold transition ${
                         candidateStatus[selectedCandidate.email] === "rejected"
@@ -826,9 +834,15 @@ function RecruiterPage(props) {
 
         {view === "plagiarism" && (
           <div className="bg-slate-800 rounded-xl p-6 shadow-lg">
-            <h2 className="text-2xl font-bold text-red-400 mb-6">
-              Plagiarism Alerts
-            </h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-red-400">
+                Plagiarism Alerts
+              </h2>
+
+              <span className="text-sm text-slate-400">
+                {plagiarismData.length} flagged pair(s)
+              </span>
+            </div>
 
             {plagiarismData.length === 0 ? (
               <p className="text-slate-400">
@@ -839,23 +853,37 @@ function RecruiterPage(props) {
                 {plagiarismData.map((p, i) => (
                   <div
                     key={i}
-                    className="bg-slate-700 p-4 rounded-lg border-l-4 border-red-400"
+                    className="bg-slate-700 p-5 rounded-xl border-l-4 border-red-400 hover:bg-slate-700/80 transition"
                   >
-                    <p className="font-semibold text-white">
+                    {/* Task */}
+                    <p className="font-semibold text-white text-lg">
                       {p.task_id}
                     </p>
 
-                    <p className="text-slate-300 mt-1">
-                      User {p.user1} ↔ User {p.user2}
-                    </p>
+                    {/* Users */}
+                    <div className="mt-2">
+                      <p className="text-slate-200 font-medium">
+                        {p.user1_name || `User ${p.user1}`} ↔{" "}
+                        {p.user2_name || `User ${p.user2}`}
+                      </p>
 
-                    <p className="text-red-400 font-bold mt-2">
-                      Similarity: {p.similarity}%
-                    </p>
+                      {(p.user1_email || p.user2_email) && (
+                        <p className="text-xs text-slate-400 mt-1">
+                          {p.user1_email} • {p.user2_email}
+                        </p>
+                      )}
+                    </div>
 
-                    <p className="text-slate-400 text-sm">
-                      Language: {p.language}
-                    </p>
+                    {/* Stats */}
+                    <div className="mt-3 flex flex-wrap gap-3">
+                      <span className="bg-red-500/20 text-red-300 px-3 py-1 rounded-full text-sm font-semibold">
+                        Similarity: {p.similarity}%
+                      </span>
+
+                      <span className="bg-slate-600 text-slate-200 px-3 py-1 rounded-full text-sm">
+                        {p.language?.toUpperCase()}
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>

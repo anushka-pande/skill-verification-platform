@@ -1,5 +1,6 @@
 import Editor from "@monaco-editor/react"
 import { useEffect, useState } from "react"
+import toast from "react-hot-toast"
 import axios from "axios"
 
 function EditorPage(props) {
@@ -89,10 +90,88 @@ function EditorPage(props) {
           </span>
         </div>
 
-        <div className="mt-6 bg-slate-800 p-6 rounded-xl">
-          <p className="mt-6 text-slate-400">
-            Read input from standard input and print the result.
+        <div className="mt-6 bg-slate-800 p-6 rounded-xl space-y-5">
+          <p className="text-slate-300 whitespace-pre-line">
+            {selectedTask.description || 
+              "Read input from standard input and print the result."
+            }
           </p>
+
+          {selectedTask.constraints?.length > 0 && (
+            <div>
+              <h3 className="text-purple-400 font-semibold mb-2">
+                Constraints
+              </h3>
+
+              {selectedTask.constraints.map((x, i) => (
+                <p key={i} className="text-slate-400 text-sm">• {x}</p>
+              ))}
+            </div>
+          )}
+
+          {selectedTask.output_format && (
+            <div>
+              <h3 className="text-green-400 font-semibold mb-2">
+                Output Format
+              </h3>
+
+              <p className="text-slate-400 text-sm">
+                {selectedTask.output_format}
+              </p>
+            </div>
+          )}
+
+          {selectedTask.edge_cases?.length > 0 && (
+            <div>
+              <h3 className="text-yellow-400 font-semibold mb-2">
+                Edge Cases
+              </h3>
+
+              {selectedTask.edge_cases.map((x, i) => (
+                <p key={i} className="text-slate-400 text-sm">• {x}</p>
+              ))}
+            </div>
+          )}
+
+          {selectedTask.examples?.length > 0 && (
+            <div>
+              <h3 className="text-cyan-400 font-semibold mb-3">
+                Examples
+              </h3>
+
+              <div className="space-y-4">
+                {selectedTask.examples.map((ex, i) => (
+                  <div
+                    key={i}
+                    className="bg-slate-700 rounded-xl p-4 border border-slate-600"
+                  >
+                    <p className="text-white font-semibold mb-3">
+                      Example {i + 1}
+                    </p>
+
+                    <p className="text-slate-300">
+                      <span className="font-semibold text-white">Input:</span>{" "}
+                      {ex.input}
+                    </p>
+
+                    <p className="text-slate-300 mt-2">
+                      <span className="font-semibold text-white">Output:</span>{" "}
+                      {ex.output}
+                    </p>
+
+                    {ex.explanation && (
+                      <p className="text-slate-400 mt-2">
+                        <span className="font-semibold text-white">
+                          Explanation:
+                        </span>{" "}
+                        {ex.explanation}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -159,7 +238,7 @@ function EditorPage(props) {
                 })
 
               } catch (err) {
-                alert("Run failed")
+                toast.error("Run failed")
               } finally {
                 setRunLoading(false)
               }
@@ -177,7 +256,7 @@ function EditorPage(props) {
                 const userId = parseInt(sessionStorage.getItem("user_id"))
 
                 if (!userId) {
-                  alert("User session expired. Please login again.")
+                  toast.error("User session expired. Please login again.")
                   return
                 }
 
@@ -198,11 +277,12 @@ function EditorPage(props) {
                 )
 
                 setResult(execRes.data)
+                toast.success("Code submitted successfully")
 
               } catch (err) {
                 console.log(err)
                 console.log(err.response?.data)
-                alert(
+                toast.error(
                   err.response?.data?.detail ||
                   err.message ||
                   "Submission failed"

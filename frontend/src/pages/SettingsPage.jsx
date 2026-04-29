@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import toast from "react-hot-toast"
 import axios from "axios"
 
 function SettingsPage(props) {
@@ -85,7 +86,7 @@ function SettingsPage(props) {
                   )
                   setLanguage(selectedLanguage)
                   setDefaultLanguage(selectedLanguage)
-                  alert("Language preference saved")
+                  toast.success("Language preference saved")
                 }}
                 className="bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700"
               >
@@ -133,7 +134,7 @@ function SettingsPage(props) {
                 onClick={async () => {
 
                   if (newPassword !== confirmPassword) {
-                    alert("Passwords do not match")
+                    toast.error("Passwords do not match")
                     return
                   }
 
@@ -147,14 +148,14 @@ function SettingsPage(props) {
                       }
                     )
 
-                    alert("Password changed successfully")
+                    toast.success("Password changed successfully")
 
                     setCurrentPassword("")
                     setNewPassword("")
                     setConfirmPassword("")
 
                   } catch (err) {
-                    alert(
+                    toast.error(
                       err.response?.data?.detail ||
                       "Password change failed"
                     )
@@ -173,6 +174,7 @@ function SettingsPage(props) {
             <button
               onClick={() => {
                 sessionStorage.clear()
+                toast.success("Logged out")
                 setPage("auth")
               }}
               className="bg-red-500 px-5 py-2 rounded-lg hover:bg-red-600"

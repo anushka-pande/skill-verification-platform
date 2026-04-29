@@ -1,4 +1,5 @@
 import { useState } from "react"
+import toast from "react-hot-toast"
 import axios from "axios"
 
 function Dashboard(props) {
@@ -217,7 +218,7 @@ function Dashboard(props) {
               })
               .catch(() => {
                 setCoachText("Unable to generate coach advice right now.")
-
+                toast.error("AI coach unavailable")
                 setAiLoading(false)
               })
             }}

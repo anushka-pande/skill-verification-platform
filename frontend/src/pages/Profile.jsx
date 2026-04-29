@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import toast from "react-hot-toast"
 import axios from "axios"
 
 function ProfilePage(props) {
@@ -16,7 +17,10 @@ function ProfilePage(props) {
     axios
       .get(`http://127.0.0.1:8000/profile/${userId}`)
       .then((res) => setProfileData(res.data))
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        console.error(err)
+        toast.error("Failed to load profile")
+      })
   }, [userId])
 
   if (!profileData) {

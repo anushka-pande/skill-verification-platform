@@ -1,15 +1,18 @@
 import axios from "axios"
+import toast from "react-hot-toast"
 
 function ChooseRole({ setPage }) {
 
   const chooseRole = async (role) => {
     try {
       await axios.post("http://127.0.0.1:8000/set-role", {
-        user_id: localStorage.getItem("user_id"),
-        role: role
+        user_id: sessionStorage.getItem("user_id"),
+        role
       })
 
-      localStorage.setItem("role", role)
+      sessionStorage.setItem("role", role)
+
+      toast.success(`Logged in as ${role}`)
 
       if (role === "recruiter") {
         setPage("recruiter")
@@ -18,7 +21,7 @@ function ChooseRole({ setPage }) {
       }
 
     } catch (err) {
-      alert("Failed to set role")
+      toast.error("Failed to set role")
       console.error(err)
     }
   }
