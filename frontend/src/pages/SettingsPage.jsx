@@ -1,12 +1,24 @@
 import { useState, useEffect } from "react"
 import toast from "react-hot-toast"
 import axios from "axios"
+import {
+  FiArrowLeft,
+  FiMail,
+  FiUser,
+  FiKey,
+  FiGlobe,
+  FiMoon,
+  FiSun,
+  FiLogOut
+} from "react-icons/fi"
 
 function SettingsPage(props) {
   const { 
     setPage,
     language,
-    setLanguage
+    setLanguage,
+    theme,
+    setTheme
   } = props
 
   const email = sessionStorage.getItem("user_email")
@@ -19,6 +31,8 @@ function SettingsPage(props) {
   const [defaultLanguage, setDefaultLanguage] = useState(language)
   const [selectedLanguage, setSelectedLanguage] = useState(language)
 
+  const isCandidate = role === "candidate"
+
   useEffect(() => {
     const saved = sessionStorage.getItem("default_language") || "Python"
     setDefaultLanguage(saved)
@@ -26,50 +40,64 @@ function SettingsPage(props) {
   }, [])
 
   return (
-    <div className="min-h-screen bg-slate-900 p-10 text-white">
-
+    <div className="page-shell text-main">
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
         <button
           onClick={() => setPage("dashboard")}
-          className="bg-slate-700 px-4 py-2 rounded-lg hover:bg-slate-600"
+          className="btn-glass px-4 py-2 rounded-lg flex items-center gap-2 hover:opacity-90"
         >
-          ← Back
+          <FiArrowLeft className="text-[var(--icon)] text-[18px]" />
+          Back
         </button>
 
-        <h1 className="text-2xl font-bold text-purple-400">
+        <h1 className="section-title text-accent">
           Settings
         </h1>
       </div>
 
       {/* Main Card */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Left Side */}
-        <div className="lg:col-span-2 bg-slate-800 rounded-2xl p-8 space-y-8">
+        <div className="lg:col-span-2 glass rounded-3xl p-6 md:p-8 space-y-8">
           {/* Account */}
           <div>
-            <h2 className="text-lg font-semibold text-purple-300 mb-4">
+            <h2 className="text-lg font-semibold text-accent mb-4">
               Account
             </h2>
 
-            <p className="text-slate-300 mb-2">Email: {email}</p>
-            <p className="text-slate-300 mb-2">Role: {role}</p>
-            <p className="text-slate-300">User ID: {userId}</p>
+            <div className="space-y-2">
+              <p className="subtle flex items-center gap-2">
+                <FiMail className="text-[var(--icon)]" />
+                {email}
+              </p>
+
+              <p className="subtle flex items-center gap-2">
+                <FiUser className="text-[var(--icon)]" />
+                {role}
+              </p>
+
+              <p className="subtle flex items-center gap-2">
+                <FiKey className="text-[var(--icon)]" />
+                {userId}
+              </p>
+            </div>
           </div>
 
           {/* Preferences */}
           <div>
-            <h2 className="text-lg font-semibold text-purple-300 mb-4">
+            <h2 className="text-lg font-semibold text-accent mb-4">
               Preferences
             </h2>
 
             <div className="flex gap-3 items-center">
+              <FiGlobe className="text-[var(--icon)] text-[18px]" />
               <select
                 value={selectedLanguage}
                 onChange={(e) =>
                   setSelectedLanguage(e.target.value)
                 }
-                className="bg-slate-700 px-4 py-2 rounded-lg"
+                className="btn-glass px-4 py-2 rounded-lg"
               >
                 <option value="python">Python</option>
                 <option value="c">C</option>
@@ -88,47 +116,82 @@ function SettingsPage(props) {
                   setDefaultLanguage(selectedLanguage)
                   toast.success("Language preference saved")
                 }}
-                className="bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700"
+                className="btn-primary px-4 py-2 rounded-lg hover:text-accent"
               >
                 Save
               </button>
             </div>
 
-            <p className="text-sm text-slate-400 mt-2">
+            <p className="text-sm subtle mt-2">
               Default coding language
             </p>
+
+            <div className="mt-6">
+              <h3 className="font-semibold mb-3 text-accent">
+                Theme
+              </h3>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setTheme("dark")}
+                  className={`px-4 py-2 rounded-xl flex items-center gap-2 ${
+                    theme === "dark" ? "btn-primary" : "btn-glass"
+                  }`}
+                >
+                  <FiMoon /> Dark
+                </button>
+
+                <button
+                  onClick={() => setTheme("light")}
+                  className={`px-4 py-2 rounded-xl flex items-center gap-2 ${
+                    theme === "light" ? "btn-primary" : "btn-glass"
+                  }`}
+                >
+                  <FiSun /> Light
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Security */}
           <div>
-            <h2 className="text-lg font-semibold text-purple-300 mb-4">
+            <h2 className="text-lg font-semibold text-accent mb-4">
               Security
             </h2>
 
             <div className="space-y-3">
-              <input
-                type="password"
-                placeholder="Current Password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full bg-slate-700 px-4 py-2 rounded-lg"
-              />
+              <div className="relative">
+                <FiKey className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--icon)]" />
+                <input
+                  type="password"
+                  placeholder="Current Password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="w-full glass px-4 py-2 rounded-xl"
+                />
+              </div>
 
-              <input
-                type="password"
-                placeholder="New Password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full bg-slate-700 px-4 py-2 rounded-lg"
-              />
+              <div className="relative">
+                <FiKey className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--icon)]" />
+                <input
+                  type="password"
+                  placeholder="New Password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full glass px-4 py-2 rounded-xl"
+                />
+              </div>
 
-              <input
-                type="password"
-                placeholder="Confirm New Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full bg-slate-700 px-4 py-2 rounded-lg"
-              />
+              <div className="relative">
+                <FiKey className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--icon)]" />
+                <input
+                  type="password"
+                  placeholder="Confirm New Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full glass px-4 py-2 rounded-xl"
+                />
+              </div>
 
               <button
                 onClick={async () => {
@@ -162,7 +225,7 @@ function SettingsPage(props) {
                   }
 
                 }}
-                className="bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700"
+                className="btn-primary px-4 py-2 rounded-lg hover:text-accent"
               >
                 Update Password
               </button>
@@ -177,40 +240,46 @@ function SettingsPage(props) {
                 toast.success("Logged out")
                 setPage("auth")
               }}
-              className="bg-red-500 px-5 py-2 rounded-lg hover:bg-red-600"
+              className="bg-red-500 hover:bg-red-600 px-5 py-2 rounded-lg flex items-center gap-2"
             >
+              <FiLogOut />
               Logout
             </button>
           </div>
         </div>
 
         {/* Right Side */}
-        <div className="bg-slate-800 rounded-2xl p-8 space-y-6">
-          <h2 className="text-lg font-semibold text-purple-300">
+        <div className="glass rounded-3xl p-6 md:p-8 space-y-6 fade-in">
+          <h2 className="text-lg font-semibold text-accent">
             Quick Overview
           </h2>
 
-          <div className="bg-slate-700 rounded-xl p-4">
-            <p className="text-slate-400 text-sm">Role</p>
+          <div className="glass rounded-2xl p-4">
+            <p className="subtle text-sm">Role</p>
             <p className="text-xl font-bold">{role}</p>
           </div>
 
-          <div className="bg-slate-700 rounded-xl p-4">
-            <p className="text-slate-400 text-sm">Preferred Language</p>
+          <div className="glass rounded-2xl p-4">
+            <p className="subtle text-sm">Preferred Language</p>
             <p className="text-xl font-bold">{defaultLanguage}</p>
           </div>
 
-          <div className="bg-slate-700 rounded-xl p-4">
-            <p className="text-slate-400 text-sm">Security</p>
-            <p className="text-green-400 font-semibold">
+          <div className="glass rounded-2xl p-4">
+            <p className="subtle text-sm">Security</p>
+            <p className="text-success font-semibold">
               Account Active
             </p>
           </div>
 
-          <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-4">
-            <p className="font-semibold">Tip</p>
-            <p className="text-sm mt-2">
-              Keep solving regularly to improve rankings.
+          <div className="glass rounded-2xl p-5 border border-[var(--border)]">
+            <p className="font-semibold text-accent mb-2">
+              Tip
+            </p>
+
+            <p className="text-sm text-main">
+              {isCandidate
+                ? "Keep solving regularly to improve rankings."
+                : "Create smart assessments to identify top candidates faster."}
             </p>
           </div>
         </div>

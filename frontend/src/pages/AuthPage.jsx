@@ -1,6 +1,6 @@
-import { Eye, EyeOff } from "lucide-react"
 import toast from "react-hot-toast"
 import axios from "axios"
+import { FiUser, FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi"
 
 function AuthPage(props) {
   const {
@@ -41,95 +41,111 @@ function AuthPage(props) {
 
   return (
     <>
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-        <div className="bg-slate-800/70 backdrop-blur-md p-10 rounded-2xl shadow-2xl w-[400px]">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg)] text-main transition-all duration-300">
+        <div className="glass p-8 rounded-2xl w-[400px] shadow-xl">
         
-          <h1 className="text-3xl font-bold text-center bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-            Skill Verification Platform
-          </h1>
+          <div className="text-center mb-6">
+            <h1 className="font-bold text-3xl bg-gradient-to-r from-[var(--accent)] to-[var(--accent-2)] bg-clip-text text-transparent">
+              Provenix
+            </h1>
 
-          <p className="text-slate-400 text-center mt-2 mb-6">
+            <p className="subtle text-sm mt-1">
+              Skill Verification Platform
+            </p>
+          </div>
+
+          <p className="subtle text-center mt-2 mb-6">
             {isLogin ? "Login to continue" : "Create your account"}
           </p>
 
           <div className="space-y-4">
             {!isLogin && (
-              <input
-                type="text"
-                placeholder="Full Name"
-                disabled={showOtpInput}
-                className={`w-full p-3 rounded-lg bg-slate-700 text-white ${
-                 showOtpInput ? "opacity-50 cursor-not-allowed" : ""
-                } focus:outline-none focus:ring-2 focus:ring-purple-500`}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
+              <div className="relative">
+                <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--icon)] opacity-80 text-lg" />
+
+                <input
+                  type="text"
+                  placeholder="Full Name"
+                  disabled={showOtpInput}
+                  className={`w-full pl-12 pr-4 py-3 rounded-lg glass bg-white/70 dark:bg-white/5 text-main ${
+                    showOtpInput ? "opacity-50 cursor-not-allowed" : ""
+                  } focus:outline-none focus:ring-2 focus:ring-[var(--accent)]`}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
             )}
 
-            <input
-              type="email"
-              placeholder="Email"
-              disabled={showOtpInput}
-              className={`w-full p-3 rounded-lg bg-slate-700 text-white ${
+            <div className="relative">
+              <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--icon)] topacity-80 ext-lg" />
+
+              <input
+                type="email"
+                placeholder="Email"
+                disabled={showOtpInput}
+                className={`w-full pl-12 pr-4 py-3 rounded-lg glass bg-white/70 dark:bg-white/5 text-main ${
                   showOtpInput ? "opacity-50 cursor-not-allowed" : ""
-              } focus:outline-none focus:ring-2 focus:ring-purple-500`}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+                } focus:outline-none focus:ring-2 focus:ring-[var(--accent)]`}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
 
             <div className="relative">
+              <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--icon)] opacity-80 text-lg" />
+
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 disabled={showOtpInput}
-                className={`w-full p-3 pr-10 rounded-lg bg-slate-700 text-white ${
+                className={`w-full pl-12 pr-12 py-3 rounded-lg glass bg-white/70 dark:bg-white/5 text-main ${
                   showOtpInput ? "opacity-50 cursor-not-allowed" : ""
-                } focus:outline-none focus:ring-2 focus:ring-purple-500`}
+                } focus:outline-none focus:ring-2 focus:ring-[var(--accent)]`}
                 value={password}
                 onChange={(e) => {
                   const value = e.target.value
                   setPassword(value)
                   if (!isLogin) {
-                      setPasswordStrength(checkPasswordStrength(value))
+                    setPasswordStrength(checkPasswordStrength(value))
                   }
                 }}
               />
 
-              {/* Icon */}
+              {/* Toggle icon */}
               <span
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-300"
+                className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-[var(--icon)] opacity-80 hover:opacity-100"
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
               </span>
             </div>
 
             {!isLogin && !showOtpInput && (
               <>
                 <div className="text-xs mt-2 space-y-1">
-                  <p className={password.length >= 8 ? "text-green-400" : "text-red-400"}>
+                  <p className={password.length >= 8 ? "text-success" : "text-danger"}>
                     • At least 8 characters
                   </p>
-                  <p className={/[A-Z]/.test(password) ? "text-green-400" : "text-red-400"}>
+                  <p className={/[A-Z]/.test(password) ? "text-success" : "text-danger"}>
                     • One uppercase letter
                   </p>
-                  <p className={/[a-z]/.test(password) ? "text-green-400" : "text-red-400"}>
+                  <p className={/[a-z]/.test(password) ? "text-success" : "text-danger"}>
                     • One lowercase letter
                   </p>
-                  <p className={/[0-9]/.test(password) ? "text-green-400" : "text-red-400"}>
+                  <p className={/[0-9]/.test(password) ? "text-success" : "text-danger"}>
                     • One number
                   </p>
-                  <p className={/[^A-Za-z0-9]/.test(password) ? "text-green-400" : "text-red-400"}>
+                  <p className={/[^A-Za-z0-9]/.test(password) ? "text-success" : "text-danger"}>
                     • One special character
                   </p>
                 </div>
 
                 <p className={`mt-2 font-semibold ${
                   passwordStrength === "Strong"
-                    ? "text-green-400"
+                    ? "text-success"
                     : passwordStrength === "Medium"
-                    ? "text-yellow-400"
-                    : "text-red-400"
+                    ? "text-warning"
+                    : "text-danger"
                   }`}
                 >
                   Strength: {passwordStrength}
@@ -144,7 +160,7 @@ function AuthPage(props) {
                   placeholder="Enter OTP"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
-                  className="w-full p-3 rounded-lg bg-slate-700 text-white"
+                  className="w-full p-3 rounded-lg themed-input text-main"
                 />
 
                 <button
@@ -166,7 +182,7 @@ function AuthPage(props) {
                         toast.error(err.response?.data?.detail || "Invalid OTP")
                       }
                   }}
-                  className="mt-2 w-full bg-green-500 p-2 rounded"
+                  className="mt-2 w-full p-2 rounded btn-accent"
                 >
                 Verify OTP
                 </button>
@@ -176,7 +192,7 @@ function AuthPage(props) {
               <button
                 onClick={handleSubmit}
                 disabled={showOtpInput && !isLogin}
-                className={`w-full p-3 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 ${
+                className={`w-full p-3 rounded-lg bg-gradient-to-r btn-primary ${
                     showOtpInput ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"
                 } transition text-white font-semibold`}
               >
@@ -184,11 +200,11 @@ function AuthPage(props) {
               </button>
           </div>
 
-          <div className="text-center mt-6 text-slate-400 text-sm">
+          <div className="text-center mt-6 subtle text-sm">
               {isLogin ? "Don't have an account?" : "Already have an account?"}
             <button
               onClick={() => setIsLogin(!isLogin)}
-              className="ml-2 text-purple-400 hover:underline"
+              className="ml-2 text-accent hover:underline"
             >
               {isLogin ? "Register" : "Login"}
             </button>

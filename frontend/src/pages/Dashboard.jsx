@@ -1,6 +1,17 @@
 import { useState } from "react"
 import toast from "react-hot-toast"
 import axios from "axios"
+import {
+  FiClipboard,
+  FiSettings,
+  FiUser,
+  FiChevronDown,
+  FiPlusCircle,
+  FiBarChart2,
+  FiSearch,
+  FiLogOut,
+  FiX
+} from "react-icons/fi"
 
 function Dashboard(props) {
   const [aiOpen, setAiOpen] = useState(false)
@@ -29,17 +40,17 @@ function Dashboard(props) {
 
   return (
     <>
-      <div className="min-h-screen bg-slate-900 p-10">
-        <div className="sticky top-0 z-40 backdrop-blur-xl bg-slate-950/70 border-b border-slate-800 px-6 py-4">
+      <div className="page-shell">
+        <div className="sticky top-0 z-40 glass rounded-2xl px-4 md:px-6 py-4 mb-8">
           <div className="flex flex-col xl:flex-row lg:items-center lg:justify-between gap-4">
 
             {/* LEFT */}
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+              <h1 className="font-bold text-3xl bg-gradient-to-r from-[var(--accent)] to-[var(--accent-2)] bg-clip-text text-transparent">
                 Provenix
               </h1>
 
-              <p className="text-sm text-slate-400 mt-1">
+              <p className="text-sm subtle mt-1">
                 {role === "recruiter"
                   ? "Assessment Catalog"
                   : "Coding Dashboard"}
@@ -47,13 +58,15 @@ function Dashboard(props) {
             </div>
 
             {/* CENTER SEARCH */}
-            <div className="flex-1 max-w-xl">
+            <div className="relative w-full">
+              <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--icon)] opacity-90 text-[18px] pointer-events-none z-10" />
+
               <input
                 type="text"
                 placeholder="Search tasks..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full glass rounded-xl pl-12 pr-4 py-3"
               />
             </div>
 
@@ -62,7 +75,7 @@ function Dashboard(props) {
               <select
                 value={difficulty}
                 onChange={(e) => setDifficulty(e.target.value)}
-                className="bg-slate-900 border border-slate-700 px-4 py-3 rounded-xl text-white min-w-[100px]"
+                className="glass px-4 py-3 rounded-xl text-main min-w-[100px]"
               >
                 <option>All</option>
                 <option>Easy</option>
@@ -73,9 +86,10 @@ function Dashboard(props) {
               {role === "candidate" && (
                 <button
                   onClick={() => setPage("submissions")}
-                  className="px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 hover:bg-slate-800"
+                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl glass hover:opacity-90"
                 >
-                  Submissions
+                  <FiClipboard className="text-[var(--icon)] opacity-90 text-[18px]" />
+                    Submissions
                 </button>
               )}
 
@@ -83,45 +97,50 @@ function Dashboard(props) {
                 <>
                   <button
                     onClick={() => setPage("add-task")}
-                    className="px-4 py-3 rounded-xl bg-purple-600 hover:bg-purple-500"
+                    className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl glass hover:opacity-90 whitespace-nowrap"
                   >
-                    Add Task
+                    <FiPlusCircle className="text-[var(--icon)] opacity-90 text-[18px]" />
+                      Add Task
                   </button>
 
                   <button
                     onClick={() => setPage("recruiter")}
-                    className="px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 hover:bg-slate-800"
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl glass hover:opacity-90"
                   >
-                    Reports
+                    <FiBarChart2 className="text-[var(--icon)] opacity-90 text-[18px]" />
+                      Reports
                   </button>
                 </>
               )}
 
               <button
                 onClick={() => setPage("settings")}
-                className="px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 hover:bg-slate-800"
+                className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl glass border border-[var(--border)]"
               >
-                Settings
+                <FiSettings className="text-[var(--icon)] opacity-90 text-[18px]" />
+                  Settings
               </button>
 
               {/* PROFILE */}
               <div className="relative">
                 <button
                   onClick={() => setProfileOpen(!profileOpen)}
-                  className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700"
+                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl glass whitespace-nowrap"
                 >
-                  Profile ▼
+                  <FiUser className="text-[var(--icon)] opacity-90 text-[18px]" />
+                    Profile
+                  <FiChevronDown className="text-[var(--icon)] opacity-70 text-[16px]" />
                 </button>
 
                 {profileOpen && (
-                  <div className="absolute right-0 mt-2 w-44 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50">
+                  <div className="absolute right-0 mt-2 w-44 glass border border-[var(--border)] rounded-xl shadow-2xl z-50">
 
                     <button
                       onClick={() => {
                         setPage("profile")
                         setProfileOpen(false)
                       }}
-                      className="w-full text-left px-4 py-3 hover:bg-slate-700"
+                      className="w-full flex items-center justify-center text-left px-4 py-3 hover:themed-input"
                     >
                       My Profile
                     </button>
@@ -131,9 +150,10 @@ function Dashboard(props) {
                         sessionStorage.clear()
                         setPage("auth")
                       }}
-                      className="w-full text-left px-4 py-3 text-red-400 hover:bg-slate-700"
+                      className="w-full flex items-center justify-center gap-2 text-left px-4 py-3 text-danger hover:themed-input"
                     >
-                      Logout
+                      <FiLogOut className="text-danger text-[18px]" />
+                        Logout
                     </button>
 
                   </div>
@@ -144,30 +164,30 @@ function Dashboard(props) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 exl:grid-cols-4 gap-5">
           {filteredTasks.map((task, index) => (
             <div
             key={index}
-            className="bg-slate-800 p-6 rounded-xl shadow-md hover:shadow-xl hover:scale-[1.03] transition duration-300"
+            className="glass p-6 rounded-2xl hover:scale-[1.02] hover:shadow-2xl transition-all duration-300"
             >
               <div className="space-y-2">
-                <h2 className="text-xl font-bold text-white mb-2">
+                <h2 className="text-xl font-bold card-title mb-2">
                   {task.title}
                 </h2>
 
                 <span
                 className={`inline-block px-3 py-1 text-xs rounded-full ${
                   task.difficulty === "Easy"
-                  ? "bg-green-500/20 text-green-400"
+                  ? "bg-green-500/15 text-success"
                   : task.difficulty === "Medium"
-                  ? "bg-yellow-500/20 text-yellow-400"
-                  : "bg-red-500/20 text-red-400"
+                  ? "bg-yellow-500/15 text-warning"
+                  : "bg-red-500/15 text-danger"
                 }`}
                 >
                   {task.difficulty}
                 </span>
 
-                <p className="text-slate-400">
+                <p className="subtle">
                   Skill: {task.skill}
                 </p>
 
@@ -182,7 +202,7 @@ function Dashboard(props) {
                       setPage("editor")
                     }
                   }}
-                  className="mt-4 w-full bg-gradient-to-r from-purple-500 to-blue-500 px-4 py-2 rounded-lg hover:opacity-90 transition font-semibold"
+                  className="mt-4 w-full btn-primary px-4 py-2 rounded-lg hover:opacity-90 transition font-semibold"
                 >
                   {role === "recruiter" ? "View Task" : "Solve"}
                 </button>
@@ -192,9 +212,9 @@ function Dashboard(props) {
         </div>
 
         {tasks.length === 0 && (
-          <p className="text-slate-400 text-center col-span-full">
+          <div className="col-span-full glass rounded-2xl p-10 text-center subtle">
             No tasks found for selected difficulty.
-          </p>
+          </div>
         )}
 
         {role === "candidate" && 
@@ -222,52 +242,52 @@ function Dashboard(props) {
                 setAiLoading(false)
               })
             }}
-            className="fixed bottom-6 right-6 w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 text-white text-2xl shadow-xl hover:scale-110 transition z-50"
+            className="fixed bottom-6 right-6 w-14 h-14 flex items-center justify-center rounded-full btn-primary text-white text-lg shadow-xl hover:scale-110 transition z-50"
           >
             AI
           </button>
         }
 
         {role === "candidate" && aiOpen && (
-          <div className="fixed top-0 right-0 h-full w-[380px] bg-slate-800 z-50 shadow-2xl p-6 overflow-y-auto">
+          <div className="fixed top-0 right-0 h-full w-[380px] glass z-50 shadow-2xl p-6 overflow-y-auto">
             {aiLoading ? (
               <div className="space-y-4 animate-pulse mt-8">
-                <p className="text-purple-300">Analyzing your performance...</p>
+                <p className="text-accent">Analyzing your performance...</p>
 
-                <div className="h-5 bg-slate-700 rounded"></div>
-                <div className="h-5 bg-slate-700 rounded"></div>
-                <div className="h-20 bg-slate-700 rounded"></div>
-                <div className="h-10 bg-slate-700 rounded"></div>
+                <div className="h-5 themed-input rounded"></div>
+                <div className="h-5 themed-input rounded"></div>
+                <div className="h-20 themed-input rounded"></div>
+                <div className="h-10 themed-input rounded"></div>
               </div>
             ) : (
               <>
                 <div className="fixed inset-0 bg-black/50 z-50">
-                  <div className="absolute right-0 top-0 h-full w-[430px] max-w-full bg-slate-800 p-6 overflow-y-auto shadow-2xl">
+                  <div className="absolute right-0 top-0 h-full w-[430px] max-w-full glass p-6 overflow-y-auto shadow-2xl">
 
                     {/* Header */}
                     <div className="flex justify-between items-center mb-6">
-                      <h2 className="text-xl font-bold text-purple-400">
+                      <h2 className="text-xl font-bold text-accent">
                         AI Help Panel
                       </h2>
 
                       <button
                         onClick={() => setAiOpen(false)}
-                        className="text-white text-xl"
+                        className="text-main text-xl"
                       >
-                        ✕
+                        <FiX className="text-[var(--icon)] opacity-90 text-[20px]" />
                       </button>
                     </div>
 
                     <div className="mb-6">
-                      <h3 className="text-blue-200 font-bold mt-6">
+                      <h3 className="text-blue-600 font-bold mt-6">
                         AI Coach Summary
                       </h3>
 
                       {coachLoading ? (
-                        <p className="text-slate-400">Generating advice...</p>
+                        <p className="subtle">Generating advice...</p>
                       ) : (
-                        <div className="bg-slate-700 rounded-xl p-4 max-h-72 overflow-y-auto">
-                          <div className="whitespace-pre-line text-sm text-slate-200 leading-7">
+                        <div className="themed-input rounded-xl p-4 max-h-72 overflow-y-auto">
+                          <div className="whitespace-pre-line text-sm subtle leading-7">
                             {coachText}
                           </div>
                         </div>
@@ -276,7 +296,7 @@ function Dashboard(props) {
 
                     {/* Strengths */}
                     <div className="mb-6">
-                      <p className="font-semibold text-green-400 mb-2">
+                      <p className="font-semibold text-success mb-2">
                         Strengths
                       </p>
 
@@ -287,7 +307,7 @@ function Dashboard(props) {
 
                     {/* Weaknesses */}
                     <div className="mb-6">
-                      <p className="font-semibold text-red-400 mb-2">
+                      <p className="font-semibold text-danger mb-2">
                         Weak Areas
                       </p>
 
@@ -298,7 +318,7 @@ function Dashboard(props) {
 
                     {/* Trend */}
                     <div className="mb-6">
-                      <p className="font-semibold text-blue-400 mb-2">
+                      <p className="font-semibold text-blue-600 mb-2">
                         Trend
                       </p>
 
@@ -307,7 +327,7 @@ function Dashboard(props) {
 
                     {/* Readiness */}
                     <div className="mb-6">
-                      <p className="font-semibold text-yellow-400 mb-2">
+                      <p className="font-semibold text-warning mb-2">
                         Readiness Score
                       </p>
 
@@ -318,7 +338,7 @@ function Dashboard(props) {
 
                     {/* Recommendations */}
                     <div>
-                      <p className="font-semibold text-purple-300 mb-2">
+                      <p className="font-semibold text-accent mb-2">
                         Recommendations
                       </p>
 
@@ -326,7 +346,7 @@ function Dashboard(props) {
                         <p key={i} className="mb-1">• {x}</p>
                       ))}
 
-                      <h3 className="text-purple-300 font-semibold mt-6 mb-3">
+                      <h3 className="text-accent font-semibold mt-6 mb-3">
                         Recommended Tasks
                       </h3>
 
@@ -344,17 +364,17 @@ function Dashboard(props) {
                               setPage("editor")
                             }
                           }}
-                          className="bg-slate-700 rounded-xl p-3 mb-3 cursor-pointer hover:bg-slate-600 transition"
+                          className="themed-input rounded-xl p-3 mb-3 cursor-pointer hover:themed-input transition"
                         >
                           <p className="font-semibold">{task.title}</p>
-                          <p className="text-sm text-slate-400">
+                          <p className="text-sm subtle">
                             {task.skill} • {task.difficulty}
                           </p>
-                          <p className="text-sm text-green-400 mt-1">
+                          <p className="text-sm text-success mt-1">
                             {task.reason}
                           </p>
                           <button
-                            className="mt-3 w-full bg-purple-500 px-3 py-2 rounded-lg text-sm hover:bg-purple-600"
+                            className="mt-3 w-full bg-accent text-white px-3 py-2 rounded-lg text-sm"
                           >
                             Solve Now
                           </button>

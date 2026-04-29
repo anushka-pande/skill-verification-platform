@@ -2,6 +2,15 @@ import Editor from "@monaco-editor/react"
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
 import axios from "axios"
+import {
+  FiClock,
+  FiArrowLeft,
+  FiPlay,
+  FiSend,
+  FiCheckCircle,
+  FiXCircle,
+  FiAlertTriangle
+} from "react-icons/fi"
 
 function EditorPage(props) {
   const [customInput, setCustomInput] = useState("")
@@ -52,17 +61,22 @@ function EditorPage(props) {
   const secs = timeLeft % 60
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white flex">
+    <div className="min-h-screen text-main flex flex-col lg:flex-row">
       {/* LEFT PANEL — Problem */}
-      <div className="w-1/2 p-8 border-r border-slate-800 overflow-y-auto">
+      <div className="w-full lg:w-1/2 p-4 md:p-8 lg:border-r border-[var(--border)] overflow-y-auto">
         {/* Navbar */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-xl font-bold text-purple-400">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <h1 className="font-bold text-3xl bg-gradient-to-r from-[var(--accent)] to-[var(--accent-2)] bg-clip-text text-transparent">
             Provenix
           </h1>
 
-          <span className="text-slate-400">
+          <span className="subtle">
             {sessionStorage.getItem("user_email")}
+          </span>
+
+          <span className="flex items-center gap-2 text-warning font-semibold">
+            <FiClock className="text-[var(--icon)] opacity-90 text-[18px]" />
+            {mins}:{secs.toString().padStart(2, "0")}
           </span>
         </div>
 
@@ -71,27 +85,24 @@ function EditorPage(props) {
             setResult(null)
             setPage("dashboard")
           }}
-          className="mb-6 bg-slate-700 px-4 py-2 rounded-lg hover:bg-slate-600"
+          className="mb-6 flex items-center gap-2 btn-primary btn-glass px-4 py-2 rounded-lg hover:themed-input"
         >
-          ← Back
+          <FiArrowLeft className="text-[var(--icon)] text-[18px]" />
+          Back
         </button>
 
-        <h1 className="text-3xl font-bold text-purple-400">
+        <h1 className="text-3xl font-bold text-accent">
           {selectedTask.title}
         </h1>
 
-        <div className="mt-4 flex flex-wrap gap-4 text-sm text-slate-400">
+        <div className="mt-4 flex flex-wrap gap-4 text-sm subtle">
           <span>Difficulty: {selectedTask.difficulty}</span>
           <span>Runtime Limit: {selectedTask.execution_time_limit || 1}s</span>
           <span>Recommended Time: {selectedTask.solve_time_limit || 20} min</span>
-
-          <span className="text-yellow-400 font-semibold">
-            ⏱ {mins}:{secs.toString().padStart(2, "0")}
-          </span>
         </div>
 
-        <div className="mt-6 bg-slate-800 p-6 rounded-xl space-y-5">
-          <p className="text-slate-300 whitespace-pre-line">
+        <div className="mt-6 glass p-6 rounded-xl space-y-5">
+          <p className="subtle whitespace-pre-line">
             {selectedTask.description || 
               "Read input from standard input and print the result."
             }
@@ -99,23 +110,23 @@ function EditorPage(props) {
 
           {selectedTask.constraints?.length > 0 && (
             <div>
-              <h3 className="text-purple-400 font-semibold mb-2">
+              <h3 className="text-accent font-semibold mb-2">
                 Constraints
               </h3>
 
               {selectedTask.constraints.map((x, i) => (
-                <p key={i} className="text-slate-400 text-sm">• {x}</p>
+                <p key={i} className="subtle text-sm">• {x}</p>
               ))}
             </div>
           )}
 
           {selectedTask.output_format && (
             <div>
-              <h3 className="text-green-400 font-semibold mb-2">
+              <h3 className="text-success font-semibold mb-2">
                 Output Format
               </h3>
 
-              <p className="text-slate-400 text-sm">
+              <p className="subtle text-sm">
                 {selectedTask.output_format}
               </p>
             </div>
@@ -123,19 +134,19 @@ function EditorPage(props) {
 
           {selectedTask.edge_cases?.length > 0 && (
             <div>
-              <h3 className="text-yellow-400 font-semibold mb-2">
+              <h3 className="text-warning font-semibold mb-2">
                 Edge Cases
               </h3>
 
               {selectedTask.edge_cases.map((x, i) => (
-                <p key={i} className="text-slate-400 text-sm">• {x}</p>
+                <p key={i} className="subtle text-sm">• {x}</p>
               ))}
             </div>
           )}
 
           {selectedTask.examples?.length > 0 && (
             <div>
-              <h3 className="text-cyan-400 font-semibold mb-3">
+              <h3 className="text-accent font-semibold mb-3">
                 Examples
               </h3>
 
@@ -143,25 +154,25 @@ function EditorPage(props) {
                 {selectedTask.examples.map((ex, i) => (
                   <div
                     key={i}
-                    className="bg-slate-700 rounded-xl p-4 border border-slate-600"
+                    className="glass rounded-xl p-4 border border-[var(--border)]"
                   >
-                    <p className="text-white font-semibold mb-3">
+                    <p className="text-main font-semibold mb-3">
                       Example {i + 1}
                     </p>
 
-                    <p className="text-slate-300">
-                      <span className="font-semibold text-white">Input:</span>{" "}
+                    <p className="subtle">
+                      <span className="font-semibold text-main">Input:</span>{" "}
                       {ex.input}
                     </p>
 
-                    <p className="text-slate-300 mt-2">
-                      <span className="font-semibold text-white">Output:</span>{" "}
+                    <p className="subtle mt-2">
+                      <span className="font-semibold text-main">Output:</span>{" "}
                       {ex.output}
                     </p>
 
                     {ex.explanation && (
-                      <p className="text-slate-400 mt-2">
-                        <span className="font-semibold text-white">
+                      <p className="subtle mt-2">
+                        <span className="font-semibold text-main">
                           Explanation:
                         </span>{" "}
                         {ex.explanation}
@@ -177,12 +188,12 @@ function EditorPage(props) {
 
 
       {/* RIGHT PANEL — Editor */}
-      <div className="w-1/2 p-6 flex flex-col">
+      <div className="w-full lg:w-1/2 p-4 md:p-6 flex flex-col">
         {/* Language Selector */}
         <select
           value={language}
           onChange={(e) => setLanguage(e.target.value)}
-          className="mb-4 bg-slate-700 p-2 rounded text-white"
+          className="mb-4 themed-input p-2 rounded text-main"
         >
           <option value="python">Python</option>
           <option value="cpp">C++</option>
@@ -192,8 +203,8 @@ function EditorPage(props) {
         </select>
 
         <Editor
-          height="420px"
-          theme="vs-dark"
+          height="50vh"
+          theme={sessionStorage.getItem("theme")==="light" ? "vs" : "vs-dark"}
           defaultLanguage="python"
           value={code}
           onChange={(value) => setCode(value)}
@@ -204,10 +215,10 @@ function EditorPage(props) {
           value={customInput}
           onChange={(e) => setCustomInput(e.target.value)}
           placeholder="Custom input for Run Code"
-          className="mt-4 bg-slate-800 p-3 rounded text-white"
+          className="mt-4 glass p-3 rounded text-main"
         />
 
-        <div className="flex gap-4 mt-4">
+        <div className="flex flex-col sm:flex-row gap-4 mt-4">
           <button
             onClick={async () => {
               try {
@@ -243,9 +254,10 @@ function EditorPage(props) {
                 setRunLoading(false)
               }
             }}
-            className="bg-slate-700 px-6 py-3 rounded-lg"
+            className="flex items-center justify-center gap-2 btn-primary btn-glass px-6 py-3 rounded-lg"
           >
-            {runLoading ? "Running..." : "Run Code"}
+            <FiPlay className="text-[var(--icon)] text-[18px]" />
+              {runLoading ? "Running..." : "Run Code"}
           </button>
 
           <button
@@ -291,53 +303,58 @@ function EditorPage(props) {
                 setSubmitLoading(false)
               }
             }}
-            className="bg-purple-600 px-6 py-3 rounded-lg"
+            className="flex items-center justify-center gap-2 btn-primary px-6 py-3 rounded-lg"
           >
-            {submitLoading ? "Submitting..." : "Submit Code"}
+            <FiSend className="text-[var(--icon)] text-[18px]" />
+              {submitLoading ? "Submitting..." : "Submit Code"}
           </button>
         </div>
 
         {result?.runOnly && (
-          <div className="mt-6 bg-slate-800 p-6 rounded-xl">
-            <h2 className="text-cyan-400 text-xl mb-3">Run Result</h2>
+          <div className="mt-6 glass p-6 rounded-xl">
+            <h2 className="text-accent text-xl mb-3">Run Result</h2>
 
             {result.error ? (
-              <pre className="text-red-400 whitespace-pre-wrap">
+              <pre className="text-danger whitespace-pre-wrap">
                 {result.error}
               </pre>
             ) : (
-              <pre className="text-green-400 whitespace-pre-wrap">
+              <pre className="text-success whitespace-pre-wrap">
                 {result.output}
               </pre>
             )}
 
-            <p className="text-slate-400 mt-2">
+            <p className="subtle mt-2">
               Execution Time: {result.execution_time}s
             </p>
             {result.hint && (
-              <div className="mt-3 bg-yellow-500/10 border border-yellow-400/30 text-yellow-300 px-3 py-2 rounded-lg">
-                ⚠ Hint: {result.hint}
+              <div className="mt-3 flex items-center gap-2 bg-yellow-500/10 border border-yellow-400/30 text-warning px-3 py-2 rounded-lg">
+                <FiAlertTriangle className="text-[18px]" />
+                Hint: {result.hint}
               </div>
             )}
           </div>
         )}
 
         {result && !result.runOnly && (
-          <div className="mt-6 bg-slate-800 p-6 rounded-xl">
-            <h2 className="text-green-400 text-3xl font-bold mb-4">
+          <div className="mt-6 glass p-6 rounded-xl">
+            <h2 className="text-success text-3xl font-bold mb-4">
               Score: {result.score}
             </h2>
 
             <div className="flex gap-6 mt-4 text-lg font-semibold">
-              <span className="text-green-400">
-                ✅ {result.test_cases.passed} Passed
+              <span className="flex items-center gap-2 text-success">
+                <FiCheckCircle className="text-[18px]" />
+                {result.test_cases.passed} Passed
               </span>
-              <span className="text-red-400">
-                ❌ {result.test_cases.failed} Failed
+
+              <span className="flex items-center gap-2 text-danger">
+                <FiXCircle className="text-[18px]" />
+                {result.test_cases.failed} Failed
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 text-slate-300 text-sm mt-4">
+            <div className="grid grid-cols-2 gap-4 subtle text-sm mt-4">
               <p>Execution:</p>
               <p>{result.breakdown.execution}</p>
 
@@ -349,20 +366,20 @@ function EditorPage(props) {
             </div>
 
             <div className="mt-6 space-y-4">
-              <h3 className="text-lg font-semibold text-purple-400">
+              <h3 className="text-lg font-semibold text-accent">
                 Test Case Results
               </h3>
 
               {result.details.map((d, index) => (
               <div
                 key={index}
-                className={`bg-slate-700 p-4 rounded-lg text-sm border-l-4 
+                className={`glass p-4 rounded-lg text-sm border-l-4 
                 ${d.status === 'passed' ? 'border-green-400' : 'border-red-400'}`}
               >
                 <p className="font-semibold mb-1 flex items-center gap-2">
                   <span>Test Case {index + 1}</span>
                   <span className={`text-xs px-2 py-1 rounded-full ${
-                    d.hidden ? "bg-red-500/20 text-red-300" : "bg-green-500/20 text-green-300"
+                    d.hidden ? "bg-red-500/20 text-danger" : "bg-green-500/20 text-success"
                   }`}>
                     {d.hidden ? "Hidden" : "Public"}
                   </span>
@@ -372,8 +389,8 @@ function EditorPage(props) {
                   <p
                     className={
                       d.status === "passed"
-                      ? "text-green-400 font-semibold"
-                      : "text-red-400 font-semibold"
+                      ? "text-success font-semibold"
+                      : "text-danger font-semibold"
                     }
                   >
                     {d.status.toUpperCase()}
@@ -384,30 +401,31 @@ function EditorPage(props) {
                     <p><strong>Expected:</strong> {d.expected}</p>
 
                     {d.error ? (
-                      <p className="text-red-400">
+                      <p className="text-danger">
                         <strong>Error:</strong> {d.error}
                       </p>
                     ) : (
                       <>
                         <div>
                           <strong>Actual:</strong> 
-                          <pre className="mt-1 whitespace-pre-wrap text-slate-300">
+                          <pre className="mt-1 whitespace-pre-wrap subtle">
                             {d.actual}
                           </pre> 
                         </div>
                         <p
                           className={
                             d.status === "passed"
-                              ? "text-green-400 font-semibold"
-                              : "text-red-400 font-semibold"
+                              ? "text-success font-semibold"
+                              : "text-danger font-semibold"
                           }
                         >
                           {d.status.toUpperCase()}
                         </p>
 
                         {d.hint && (
-                          <div className="mt-3 bg-yellow-500/10 border border-yellow-400/30 text-yellow-300 px-3 py-2 rounded-lg">
-                            ⚠ Hint: {d.hint}
+                          <div className="mt-3 flex items-center gap-2 bg-yellow-500/10 border border-yellow-400/30 text-warning px-3 py-2 rounded-lg">
+                            <FiAlertTriangle className="text-[18px]" />
+                            Hint: {d.hint}
                           </div>
                         )}
                       </>

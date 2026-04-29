@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react"
 import axios from "axios"
 import { BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts"
+import { FiUser, FiSettings, FiBarChart2 } from "react-icons/fi"
+import { HiOutlineCode } from "react-icons/hi"
+import { MdOutlineWork } from "react-icons/md"
 
 import AuthPage from "./pages/AuthPage"
 import Dashboard from "./pages/Dashboard"
@@ -69,6 +72,10 @@ function App() {
   const [skillFilter, setSkillFilter] = useState("")
   const [candidateStatus, setCandidateStatus] = useState({})
   const [plagiarismData, setPlagiarismData] = useState([])
+
+  const [theme, setTheme] = useState(
+    sessionStorage.getItem("theme") || "dark"
+  )
 
   const role = sessionStorage.getItem("role")
   const userEmail = sessionStorage.getItem("user_email")
@@ -207,6 +214,11 @@ function App() {
   useEffect(() => {
     setProfileOpen(false)
   }, [page])
+
+  useEffect(() => {
+    document.documentElement.className = theme === "light" ? "light" : ""
+    sessionStorage.setItem("theme", theme)
+  }, [theme])
 
   return (
     <>
@@ -356,6 +368,8 @@ function App() {
           setPage={setPage}
           language={language}
           setLanguage={setLanguage}
+          theme={theme}
+          setTheme={setTheme}
         />
       )}
     </>

@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
 import axios from "axios"
+import {
+  FiArrowLeft,
+  FiUser,
+  FiMail,
+  FiBarChart2,
+  FiTrendingUp,
+  FiAward
+} from "react-icons/fi"
 
 function ProfilePage(props) {
   const { setPage } = props
@@ -25,7 +33,7 @@ function ProfilePage(props) {
 
   if (!profileData) {
     return (
-      <div className="min-h-screen bg-slate-900 text-white p-10">
+      <div className="page-shell text-main fade-in">
         Loading...
       </div>
     )
@@ -34,33 +42,37 @@ function ProfilePage(props) {
   const isCandidate = role === "candidate"
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-6 md:p-10">
+    <div className="page-shell text-main fade-in">
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
         <button
           onClick={() => setPage("dashboard")}
-          className="bg-slate-700 px-4 py-2 rounded-lg hover:bg-slate-600"
+          className="btn-glass px-4 py-2 rounded-lg hover:themed-input flex items-center gap-2"
         >
-          ← Back
+          <FiArrowLeft className="text-[var(--icon)] text-[18px]" />
+          Back
         </button>
 
-        <h1 className="text-2xl font-bold text-purple-400">
+        <h1 className="text-2xl font-bold text-accent">
           {isCandidate ? "My Profile" : "Recruiter Profile"}
         </h1>
       </div>
 
       {/* Hero Card */}
-      <div className="bg-slate-800 rounded-2xl p-6 mb-8 flex items-center gap-5">
-        <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center text-2xl font-bold">
-          {name[0].toUpperCase()}
+      <div className="glass rounded-2xl p-6 mb-8 flex flex-col sm:flex-row sm:items-center gap-5">
+        <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-2xl font-bold">
+          <FiUser className="text-[28px] text-white" />
         </div>
 
         <div>
           <h2 className="text-2xl font-bold">{name}</h2>
 
-          <p className="text-slate-400">{email}</p>
+          <p className="subtle flex items-center gap-2">
+            <FiMail className="text-[var(--icon)] opacity-70" />
+            {email}
+          </p>
 
-          <span className="inline-block mt-2 px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-sm">
+          <span className="inline-block mt-2 px-3 py-1 rounded-full bg-accent text-white text-sm">
             {isCandidate ? profileData.skill_level : "Recruiter"}
           </span>
         </div>
@@ -69,32 +81,35 @@ function ProfilePage(props) {
       {isCandidate ? (
         <>
           {/* Candidate Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-            <Card title="Submissions" value={profileData.total_submissions} />
-            <Card
-              title="Average Score"
-              value={profileData.average_score}
-              color="text-purple-400"
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            <Card title="Submissions" 
+              value={profileData.total_submissions} 
+              icon={<FiBarChart2 />} 
             />
-            <Card
-              title="Best Score"
-              value={profileData.best_score}
-              color="text-yellow-400"
+
+            <Card title="Average Score" 
+              value={profileData.average_score} 
+              color="text-accent" icon={<FiTrendingUp />} 
             />
-            <Card
-              title="Success Rate"
-              value={`${profileData.success_rate}%`}
-              color="text-green-400"
+
+            <Card title="Best Score" 
+              value={profileData.best_score} 
+              color="text-warning" icon={<FiAward />} 
             />
-            <Card
-              title="Rank"
-              value={`#${profileData.rank || "-"}`}
-              color="text-yellow-300"
+
+            <Card title="Success Rate" 
+              value={`${profileData.success_rate}%`} 
+              color="text-success" icon={<FiTrendingUp />} 
             />
-            <Card
-              title="Streak"
-              value={profileData.streak_days}
-              color="text-orange-300"
+
+            <Card title="Rank" 
+              value={`#${profileData.rank || "-"}`} 
+              color="text-warning" icon={<FiAward />} 
+            />
+
+            <Card title="Streak" 
+              value={profileData.streak_days} 
+              color="text-warning" icon={<FiTrendingUp />} 
             />
           </div>
 
@@ -103,7 +118,7 @@ function ProfilePage(props) {
             <ProgressBar
               label="Average Score"
               value={profileData.average_score}
-              color="bg-purple-500"
+              color="bg-accent"
             />
 
             <ProgressBar
@@ -122,7 +137,7 @@ function ProfilePage(props) {
                     key={index}
                     label={item.skill}
                     value={item.score}
-                    color="bg-purple-500"
+                    color="bg-accent"
                   />
                 ))}
               </div>
@@ -138,17 +153,17 @@ function ProfilePage(props) {
                 {profileData.recent_activity.map((item, index) => (
                   <div
                     key={index}
-                    className="bg-slate-700 rounded-xl p-4 flex justify-between items-center"
+                    className="themed-input rounded-xl p-4 flex justify-between items-center"
                   >
                     <div>
                       <p className="font-semibold">{item.task}</p>
 
-                      <p className="text-sm text-slate-400">
+                      <p className="text-sm subtle">
                         {new Date(item.date).toLocaleString()}
                       </p>
                     </div>
 
-                    <div className="text-green-400 font-bold">
+                    <div className="text-success font-bold">
                       {item.score}
                     </div>
                   </div>
@@ -168,21 +183,21 @@ function ProfilePage(props) {
                 {profileData.best_score === 100 && (
                   <Badge
                     text="Perfect Score"
-                    classes="bg-yellow-500/20 text-yellow-300"
+                    classes="bg-yellow-100 text-warning"
                   />
                 )}
 
                 {profileData.total_submissions >= 5 && (
                   <Badge
                     text="5+ Attempts"
-                    classes="bg-blue-500/20 text-blue-300"
+                    classes="bg-blue-100 text-accent"
                   />
                 )}
 
                 {profileData.skill_level === "Advanced" && (
                   <Badge
                     text="Advanced Coder"
-                    classes="bg-purple-500/20 text-purple-300"
+                    classes="bg-accent text-accent"
                   />
                 )}
               </div>
@@ -193,34 +208,30 @@ function ProfilePage(props) {
         <>
           {/* Recruiter Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <Card
-              title="Tasks Created"
-              value={profileData.tasks_created || 0}
-              color="text-purple-400"
+            <Card title="Tasks Created" 
+              value={profileData.tasks_created || 0} 
+              color="text-accent" icon={<FiBarChart2 />} 
             />
 
-            <Card
-              title="Candidates Assessed"
-              value={profileData.candidates_assessed || 0}
-              color="text-green-400"
+            <Card title="Candidates Assessed" 
+              value={profileData.candidates_assessed || 0} 
+              color="text-success" icon={<FiUser />} 
             />
 
-            <Card
-              title="Avg Candidate Score"
-              value={`${profileData.avg_candidate_score || 0}%`}
-              color="text-yellow-300"
+            <Card title="Avg Candidate Score" 
+              value={`${profileData.avg_candidate_score || 0}%`} 
+              color="text-warning" icon={<FiTrendingUp />} 
             />
 
-            <Card
-              title="Hiring Readiness"
-              value={profileData.hiring_readiness || "Good"}
-              color="text-blue-300"
+            <Card title="Hiring Readiness" 
+              value={profileData.hiring_readiness || "Good"} 
+              color="text-blue-300" icon={<FiAward />} 
             />
           </div>
 
           {/* Recruiter Insights */}
           <Section title="Recruiter Insights">
-            <p className="text-slate-300 leading-7">
+            <p className="subtle leading-7">
               Manage coding assessments, review candidate performance,
               shortlist top performers, and strengthen hiring quality using
               data-driven evaluations.
@@ -234,7 +245,7 @@ function ProfilePage(props) {
                 {profileData.recent_activity.map((item, index) => (
                   <div
                     key={index}
-                    className="bg-slate-700 rounded-xl p-4"
+                    className="themed-input rounded-xl p-4"
                   >
                     {item.task}
                   </div>
@@ -252,19 +263,26 @@ function ProfilePage(props) {
 
 /* Reusable Components */
 
-function Card({ title, value, color = "text-white" }) {
+function Card({ title, value, color = "text-main", icon }) {
   return (
-    <div className="bg-slate-800 p-5 rounded-xl">
-      <p className="text-slate-400 text-sm">{title}</p>
-      <p className={`text-2xl font-bold ${color}`}>{value}</p>
+    <div className="glass p-5 rounded-xl hover:-translate-y-1 transition-all duration-300 flex items-center gap-4">
+      
+      <div className="text-[var(--icon)] text-xl opacity-80">
+        {icon}
+      </div>
+
+      <div>
+        <p className="subtle text-sm">{title}</p>
+        <p className={`text-2xl font-bold ${color}`}>{value}</p>
+      </div>
     </div>
   )
 }
 
 function Section({ title, children }) {
   return (
-    <div className="bg-slate-800 rounded-2xl p-6 mb-8">
-      <h3 className="text-lg font-semibold mb-4 text-purple-300">
+    <div className="glass rounded-2xl p-6 mb-8">
+      <h3 className="text-lg font-semibold mb-4 text-accent">
         {title}
       </h3>
       {children}
@@ -281,7 +299,7 @@ function Badge({ text, classes }) {
 }
 
 function EmptyState({ text }) {
-  return <p className="text-slate-400">{text}</p>
+  return <p className="subtle">{text}</p>
 }
 
 function ProgressBar({ label, value, color }) {
@@ -292,7 +310,7 @@ function ProgressBar({ label, value, color }) {
         <span>{value}</span>
       </div>
 
-      <div className="w-full bg-slate-700 rounded-full h-3">
+      <div className="w-full themed-input rounded-full h-3">
         <div
           className={`${color} h-3 rounded-full`}
           style={{ width: `${value}%` }}

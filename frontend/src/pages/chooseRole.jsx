@@ -1,5 +1,7 @@
 import axios from "axios"
 import toast from "react-hot-toast"
+import { FiUser } from "react-icons/fi"
+import { MdOutlineWork } from "react-icons/md"
 
 function ChooseRole({ setPage }) {
 
@@ -27,28 +29,30 @@ function ChooseRole({ setPage }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white">
-      <div className="bg-slate-800 p-10 rounded-2xl shadow-xl w-[420px] text-center">
+    <div className="page-shell flex items-center justify-center text-main">
+      <div className="glass p-10 rounded-2xl shadow-xl w-[430px] text-center">
 
-        <h1 className="text-3xl font-bold text-purple-400 mb-3">
+        <h1 className="text-3xl font-bold text-accent mb-3">
           Select Your Role
         </h1>
 
-        <p className="text-slate-400 mb-8">
+        <p className="subtle mb-8">
           Choose how you want to continue
         </p>
 
         <button
           onClick={() => chooseRole("candidate")}
-          className="w-full bg-purple-600 hover:bg-purple-700 p-3 rounded-lg mb-4 font-semibold"
+          className="w-full btn-primary p-3 rounded-xl mb-4 font-semibold flex items-center justify-center gap-2 hover:scale-[1.02] transition-all duration-200"
         >
+          <FiUser className="text-[var(--icon)] opacity-90 text-lg" />
           Candidate
         </button>
 
         <button
           onClick={() => chooseRole("recruiter")}
-          className="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded-lg font-semibold"
+          className="w-full btn-accent p-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:scale-[1.02] transition-all duration-200"
         >
+          <MdOutlineWork className="text-[var(--icon)] opacity-90 text-lg" />
           Recruiter
         </button>
 

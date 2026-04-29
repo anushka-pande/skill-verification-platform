@@ -1,6 +1,16 @@
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
 import axios from "axios"
+import {
+  FiArrowLeft,
+  FiClock,
+  FiCpu,
+  FiLayers,
+  FiEye,
+  FiTrendingUp,
+  FiBarChart2,
+  FiAlertTriangle
+} from "react-icons/fi"
 
 function TaskPreview(props) {
   const [stats, setStats] = useState(null)
@@ -24,24 +34,25 @@ function TaskPreview(props) {
 
   if (!task) {
     return (
-      <div className="min-h-screen bg-slate-900 text-white p-10">
+      <div className="glass rounded-2xl p-10 text-center subtle">
         No task selected
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-6 md:p-10">
+    <div className="page-shell text-main fade-in">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <button
           onClick={() => setPage("dashboard")}
-          className="bg-slate-800 px-4 py-2 rounded-lg hover:bg-slate-700 w-fit"
+          className="btn-glass px-4 py-2 rounded-lg flex items-center gap-2 w-fit"
         >
-          ← Back
+          <FiArrowLeft className="text-[var(--icon)]" />
+          Back
         </button>
 
-        <h1 className="text-2xl font-bold text-purple-400">
+        <h1 className="text-2xl font-bold text-accent">
           Task Preview
         </h1>
       </div>
@@ -51,17 +62,23 @@ function TaskPreview(props) {
         {/* LEFT SIDE */}
         <div className="lg:col-span-2 space-y-6">
           {/* Main Card */}
-          <div className="bg-slate-800 rounded-2xl p-6 shadow-lg">
-            <h2 className="text-3xl font-bold text-white">
+          <div className="glass rounded-2xl p-6 shadow-lg">
+            <h2 className="text-3xl font-bold card-title">
               {task.title}
             </h2>
 
-            <p className="text-slate-400 mt-2">
-              {task.difficulty} • {task.skill}
+            <p className="subtle mt-2 flex items-center gap-3">
+              <span className="px-2 py-1 rounded bg-[var(--border)] text-xs">
+                {task.difficulty}
+              </span>
+              <span className="flex items-center gap-1">
+                <FiLayers className="text-[var(--icon)] text-sm" />
+                {task.skill}
+              </span>
             </p>
 
             {task.description && (
-              <p className="text-slate-300 mt-6 leading-relaxed whitespace-pre-line">
+              <p className="subtle mt-6 leading-relaxed whitespace-pre-line">
                 {task.description}
               </p>
             )}
@@ -69,7 +86,7 @@ function TaskPreview(props) {
             {/* Constraints */}
             {task.constraints?.length > 0 && (
               <div className="mt-8">
-                <h3 className="text-purple-400 font-semibold mb-3">
+                <h3 className="text-accent font-semibold mb-3">
                   Constraints
                 </h3>
 
@@ -77,7 +94,7 @@ function TaskPreview(props) {
                   {task.constraints.map((item, i) => (
                     <div
                       key={i}
-                      className="bg-slate-700 rounded-lg px-4 py-3 text-sm text-slate-300"
+                      className="glass rounded-lg px-4 py-3 text-sm subtle"
                     >
                       {item}
                     </div>
@@ -89,11 +106,11 @@ function TaskPreview(props) {
             {/* Output Format */}
             {task.output_format && (
               <div className="mt-8">
-                <h3 className="text-green-400 font-semibold mb-3">
+                <h3 className="text-success font-semibold mb-3">
                   Output Format
                 </h3>
 
-                <div className="bg-slate-700 rounded-lg px-4 py-3 text-sm text-slate-300">
+                <div className="glass rounded-lg px-4 py-3 text-sm subtle">
                   {task.output_format}
                 </div>
               </div>
@@ -102,7 +119,7 @@ function TaskPreview(props) {
             {/* Examples */}
             {task.examples?.length > 0 && (
               <div className="mt-8">
-                <h3 className="text-cyan-400 font-semibold mb-3">
+                <h3 className="text-accent font-semibold mb-3">
                   Examples
                 </h3>
 
@@ -110,29 +127,29 @@ function TaskPreview(props) {
                   {task.examples.map((ex, i) => (
                     <div
                       key={i}
-                      className="bg-slate-700 rounded-xl p-5 break-words"
+                      className="glass rounded-xl p-5 break-words"
                     >
-                      <p className="font-semibold text-white mb-3">
+                      <p className="font-semibold text-main mb-3">
                         Example {i + 1}
                       </p>
 
-                      <p className="text-slate-300">
-                        <span className="font-semibold text-white">
+                      <p className="subtle">
+                        <span className="font-semibold text-main">
                           Input:
                         </span>{" "}
                         {ex.input}
                       </p>
 
-                      <p className="text-slate-300 mt-2">
-                        <span className="font-semibold text-white">
+                      <p className="subtle mt-2">
+                        <span className="font-semibold text-main">
                           Output:
                         </span>{" "}
                         {ex.output}
                       </p>
 
                       {ex.explanation && (
-                        <p className="text-slate-400 mt-2">
-                          <span className="font-semibold text-white">
+                        <p className="subtle mt-2">
+                          <span className="font-semibold text-main">
                             Explanation:
                           </span>{" "}
                           {ex.explanation}
@@ -147,78 +164,112 @@ function TaskPreview(props) {
 
           {/* Bottom Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-slate-800 rounded-xl p-4">
-              <p className="text-slate-400 text-sm">Solve Limit</p>
-              <p className="text-xl font-bold mt-1">
-                {task.solve_time_limit || 15} min
-              </p>
+            {/* Solve Limit */}
+            <div className="glass rounded-xl p-4 flex items-center justify-between">
+              <div>
+                <p className="subtle text-sm">Solve Limit</p>
+                <p className="text-xl font-bold mt-1">
+                  {task.solve_time_limit || 15} min
+                </p>
+              </div>
+              <FiClock className="text-[var(--icon)] text-xl" />
             </div>
 
-            <div className="bg-slate-800 rounded-xl p-4">
-              <p className="text-slate-400 text-sm">Execution</p>
-              <p className="text-xl font-bold mt-1">
-                {task.execution_time_limit || 1}s
-              </p>
+            {/* Execution */}
+            <div className="glass rounded-xl p-4 flex items-center justify-between">
+              <div>
+                <p className="subtle text-sm">Execution</p>
+                <p className="text-xl font-bold mt-1">
+                  {task.execution_time_limit || 1}s
+                </p>
+              </div>
+              <FiCpu className="text-[var(--icon)] text-xl" />
             </div>
 
-            <div className="bg-slate-800 rounded-xl p-4">
-              <p className="text-slate-400 text-sm">Public Tests</p>
-              <p className="text-xl font-bold mt-1">
-                {task.public_test_cases?.length || 0}
-              </p>
+            {/* Public Tests */}
+            <div className="glass rounded-xl p-4 flex items-center justify-between">
+              <div>
+                <p className="subtle text-sm">Public Tests</p>
+                <p className="text-xl font-bold mt-1">
+                  {task.public_test_cases?.length || 0}
+                </p>
+              </div>
+              <FiEye className="text-[var(--icon)] text-xl" />
             </div>
 
-            <div className="bg-slate-800 rounded-xl p-4">
-              <p className="text-slate-400 text-sm">Hidden Tests</p>
-              <p className="text-xl font-bold mt-1">
-                {task.hidden_test_cases?.length || 0}
-              </p>
+            {/* Hidden Tests */}
+            <div className="glass rounded-xl p-4 flex items-center justify-between">
+              <div>
+                <p className="subtle text-sm">Hidden Tests</p>
+                <p className="text-xl font-bold mt-1">
+                  {task.hidden_test_cases?.length || 0}
+                </p>
+              </div>
+              <FiLayers className="text-[var(--icon)] text-xl" />
             </div>
+
           </div>
         </div>
 
         {/* RIGHT SIDEBAR */}
         <div className="space-y-6 lg:sticky lg:top-6">
           {/* Analytics */}
-          <div className="bg-slate-800 rounded-2xl p-6 shadow-lg">
-            <h3 className="text-2xl font-bold text-blue-300 mb-6">
+          <div className="glass rounded-2xl p-6 shadow-lg">
+            <h3 className="text-2xl font-bold text-accent mb-6">
               Candidate Analytics
             </h3>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-slate-700 rounded-xl p-4">
-                <p className="text-sm text-slate-400">Avg Score</p>
-                <p className="text-2xl font-bold text-green-400 mt-1">
-                  {stats?.avg_score || 0}%
-                </p>
+              {/* Avg Score */}
+              <div className="glass rounded-xl p-4 flex items-center justify-between">
+                <div>
+                  <p className="subtle text-sm">Avg Score</p>
+                  <p className="text-2xl font-bold text-success mt-1">
+                    {stats?.avg_score || 0}%
+                  </p>
+                </div>
+                <FiTrendingUp className="text-success text-xl" />
               </div>
 
-              <div className="bg-slate-700 rounded-xl p-4">
-                <p className="text-sm text-slate-400">Attempts</p>
-                <p className="text-2xl font-bold mt-1">
-                  {stats?.attempts || 0}
-                </p>
+              {/* Attempts */}
+              <div className="glass rounded-xl p-4 flex items-center justify-between">
+                <div>
+                  <p className="subtle text-sm">Attempts</p>
+                  <p className="text-2xl font-bold mt-1">
+                    {stats?.attempts || 0}
+                  </p>
+                </div>
+                <FiBarChart2 className="text-[var(--icon)] text-xl" />
               </div>
 
-              <div className="bg-slate-700 rounded-xl p-4">
-                <p className="text-sm text-slate-400">Pass Rate</p>
-                <p className="text-2xl font-bold text-cyan-400 mt-1">
-                  {stats?.pass_rate || 0}%
-                </p>
+              {/* Pass Rate */}
+              <div className="glass rounded-xl p-4 flex items-center justify-between">
+                <div>
+                  <p className="subtle text-sm">Pass Rate</p>
+                  <p className="text-2xl font-bold text-accent mt-1">
+                    {stats?.pass_rate || 0}%
+                  </p>
+                </div>
+                <FiTrendingUp className="text-accent text-xl" />
               </div>
 
-              <div className="bg-slate-700 rounded-xl p-4">
-                <p className="text-sm text-slate-400">Hidden Fails</p>
-                <p className="text-2xl font-bold text-red-400 mt-1">
-                  {stats?.failed_hidden || 0}
-                </p>
+              {/* Hidden Fails */}
+              <div className="glass rounded-xl p-4 flex items-center justify-between">
+                <div>
+                  <p className="subtle text-sm">Hidden Fails</p>
+                  <p className="text-2xl font-bold text-danger mt-1">
+                    {stats?.failed_hidden || 0}
+                  </p>
+                </div>
+                <FiAlertTriangle className="text-danger text-xl" />
               </div>
             </div>
           </div>
 
           {/* Common Mistakes */}
-          <div className="bg-slate-800 rounded-2xl p-6 shadow-lg min-h-[260px]">
-            <h3 className="text-xl font-bold text-red-300 mb-4">
+          <div className="glass rounded-2xl p-6 shadow-lg min-h-[260px]">
+            <h3 className="text-xl font-bold text-danger mb-4 flex items-center gap-2">
+              <FiAlertTriangle />
               Common Mistakes
             </h3>
 
@@ -227,19 +278,26 @@ function TaskPreview(props) {
                 stats.common_mistakes.map((item, i) => (
                   <div
                     key={i}
-                    className="bg-slate-700 rounded-lg px-4 py-3 text-sm text-slate-300 leading-relaxed"
+                    className="glass rounded-lg px-4 py-3 text-sm subtle leading-relaxed"
                   >
                     {item}
                   </div>
                 ))
               ) : (
-                <div className="bg-slate-700 rounded-lg px-4 py-3 text-sm text-slate-400">
+                <div className="glass rounded-lg px-4 py-3 text-sm subtle">
                   No mistake insights available yet.
                 </div>
               )}
             </div>
           </div>
         </div>
+
+        {!stats && 
+          <p className="subtle animate-pulse flex items-center gap-2">
+            <FiBarChart2 className="text-[var(--icon)]" />
+            Loading analytics...
+          </p>
+        }
       </div>
     </div>
   )

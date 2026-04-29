@@ -1,4 +1,3 @@
-import { Star } from "lucide-react"
 import { useState, useEffect } from "react"
 import toast from "react-hot-toast"
 import axios from "axios"
@@ -7,6 +6,15 @@ import {
   LineChart, Line,
   ResponsiveContainer, CartesianGrid, XAxis, YAxis, Tooltip
 } from "recharts"
+import {
+  FiArrowLeft,
+  FiStar,
+  FiX,
+  FiDownload,
+  FiMail,
+  FiCheckCircle,
+  FiXCircle
+} from "react-icons/fi"
 
 function RecruiterPage(props) {
   const [view, setView] = useState("overview")
@@ -231,22 +239,32 @@ function RecruiterPage(props) {
 
   }, [selectedCandidate])
 
+  const isLight = sessionStorage.getItem("theme") === "light"
+
+  const chartGrid = isLight ? "#dbe3ee" : "#334155"
+  const chartAxis = isLight ? "#64748b" : "#cbd5e1"
+  const chartLine = isLight ? "#0f766e" : "#22c55e"
+  const chartBar = isLight ? "#0f766e" : "#a855f7"
+  const chartTooltipBg = isLight ? "#ffffff" : "#1e293b"
+  const chartTooltipText = isLight ? "#111827" : "#f8fafc"
+
   return (
     <>
-      <div className={`min-h-screen bg-slate-900 p-10 text-white transition-all duration-300 ${
-        selectedCandidate ? "pr-[540px]" : ""
+      <div className={`page-shell fade-in text-main transition-all duration-300 ${
+        selectedCandidate ? "lg:pr-[540px]" : ""
       }`}>
         {/* Top Bar */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setPage("dashboard")}
-              className="bg-slate-700 px-4 py-2 rounded-lg hover:bg-slate-600"
+              className="themed-input px-4 py-2 rounded-lg flex items-center gap-2 hover:opacity-90"
             >
-              ← Back
+              <FiArrowLeft className="text-[var(--icon)] text-[18px]" />
+              Back
             </button>
 
-            <h1 className="text-2xl font-bold text-purple-400">
+            <h1 className="text-2xl font-bold text-accent">
               Recruiter Dashboard
             </h1>
           </div>
@@ -254,8 +272,9 @@ function RecruiterPage(props) {
           <div className="flex items-center gap-3">
             <button
               onClick={downloadAllCSV}
-              className="bg-emerald-500 hover:bg-emerald-600 px-4 py-2 rounded-lg font-semibold"
+              className="btn-primary px-4 py-2 rounded-lg font-semibold flex items-center gap-2"
             >
+              <FiDownload className="text-white text-[18px]" />
               Export All CSV
             </button>
 
@@ -277,18 +296,19 @@ function RecruiterPage(props) {
                   toast.error(err.response?.data?.detail || err.message)
                 }
               }}
-              className="bg-emerald-500 px-4 py-2 rounded-lg"
+              className="btn-primary px-4 py-2 rounded-lg flex items-center gap-2"
             >
-              Email Shortlisted
+              <FiMail className="text-white text-[18px]" />
+                Email Shortlisted
             </button>
 
-            <div className="flex bg-slate-800 rounded-xl p-1 w-fit shadow-md">
+            <div className="flex themed-input rounded-xl p-1 w-fit shadow-md">
               <button
                 onClick={() => setView("overview")}
                 className={`px-5 py-2 rounded-lg transition ${
                   view === "overview"
-                    ? "bg-purple-600 text-white"
-                    : "text-slate-300 hover:bg-slate-700"
+                    ? "btn-primary text-main"
+                    : "subtle hover:themed-input"
                 }`}
               >
                 Candidate Overview
@@ -298,8 +318,8 @@ function RecruiterPage(props) {
                 onClick={() => setView("plagiarism")}
                 className={`px-5 py-2 rounded-lg transition ${
                   view === "plagiarism"
-                    ? "bg-red-600 text-white"
-                    : "text-slate-300 hover:bg-slate-700"
+                    ? "bg-red-600 text-main"
+                    : "subtle hover:themed-input"
                 }`}
               >
                 Plagiarism Alerts
@@ -312,37 +332,37 @@ function RecruiterPage(props) {
           <>
             {!selectedCandidate && (
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-                <div className="bg-slate-800 p-4 rounded-xl shadow">
-                  <p className="text-slate-400 text-sm">Total Candidates</p>
-                  <h3 className="text-2xl font-bold text-white">
+                <div className="glass p-4 rounded-xl shadow">
+                  <p className="subtle text-sm">Total Candidates</p>
+                  <h3 className="text-2xl font-bold card-title">
                     {totalCandidates}
                   </h3>
                 </div>
 
-                <div className="bg-slate-800 p-4 rounded-xl shadow">
-                  <p className="text-slate-400 text-sm">Shortlisted</p>
-                  <h3 className="text-2xl font-bold text-green-400">
+                <div className="glass p-4 rounded-xl shadow">
+                  <p className="subtle text-sm">Shortlisted</p>
+                  <h3 className="text-2xl font-bold text-success">
                     {shortlistedCount}
                   </h3>
                 </div>
 
-                <div className="bg-slate-800 p-4 rounded-xl shadow">
-                  <p className="text-slate-400 text-sm">Rejected</p>
-                  <h3 className="text-2xl font-bold text-red-400">
+                <div className="glass p-4 rounded-xl shadow">
+                  <p className="subtle text-sm">Rejected</p>
+                  <h3 className="text-2xl font-bold text-danger">
                     {rejectedCount}
                   </h3>
                 </div>
 
-                <div className="bg-slate-800 p-4 rounded-xl shadow">
-                  <p className="text-slate-400 text-sm">Top Performer</p>
-                  <h3 className="text-lg font-bold text-yellow-400 truncate">
+                <div className="glass p-4 rounded-xl shadow">
+                  <p className="subtle text-sm">Top Performer</p>
+                  <h3 className="text-lg font-bold text-warning truncate">
                     {bestCandidate?.name || "-"}
                   </h3>
                 </div>
 
-                <div className="bg-slate-800 p-4 rounded-xl shadow">
-                  <p className="text-slate-400 text-sm">Avg Score</p>
-                  <h3 className="text-2xl font-bold text-purple-400">
+                <div className="glass p-4 rounded-xl shadow">
+                  <p className="subtle text-sm">Avg Score</p>
+                  <h3 className="text-2xl font-bold text-accent">
                     {avgScore}
                   </h3>
                 </div>
@@ -351,16 +371,16 @@ function RecruiterPage(props) {
 
             {/* TABLE VIEW */}
             {!selectedCandidate && (
-              <div className="bg-slate-800 rounded-xl overflow-hidden shadow-lg">
+              <div className="glass rounded-xl overflow-hidden shadow-lg">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 border-b border-slate-700">
-                  <div className="flex flex-wrap gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 w-full">
                     <select
                       value={candidateSort}
                       onChange={(e) => {
                         setCandidateSort(e.target.value)
                         setCurrentPage(1)
                       }}
-                      className="bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-sm"
+                      className="themed-input border border-slate-600 px-3 py-2 rounded-lg text-sm"
                     >
                       <option value="rank">Sort by Rank</option>
                       <option value="score">Sort by Avg Score</option>
@@ -376,7 +396,7 @@ function RecruiterPage(props) {
                         setSearchTerm(e.target.value)
                         setCurrentPage(1)
                       }}
-                      className="bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-sm w-56"
+                      className="themed-input border border-slate-600 px-3 py-2 rounded-lg text-sm w-56"
                     />
 
                     <input
@@ -386,91 +406,90 @@ function RecruiterPage(props) {
                         setSkillFilter(e.target.value)
                         setCurrentPage(1)
                       }}
-                      className="bg-slate-700 border border-slate-600 px-3 py-2 rounded-lg text-sm w-48"
+                      className="themed-input border border-slate-600 px-3 py-2 rounded-lg text-sm w-48"
                     />
                   </div>
                 </div>
 
-                <table className="w-full text-left">
-                  <thead className="bg-slate-700 text-slate-300 text-sm uppercase">
-                    <tr>
-                      <th className="p-4">Rank</th>
-                      <th className="p-4">Name</th>
-                      <th className="p-4">Email</th>
-                      <th className="p-4 text-center">Submissions</th>
-                      <th className="p-4 text-center">Recruiter Score</th>
-                      <th className="p-4 text-center">Avg Score</th>
-                      <th className="p-4 text-center">Level</th>
-                      <th className="p-4 text-center">Status</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {paginatedCandidates.map((u, i) => (
-                      <tr
-                        key={i}
-                        onClick={() => setSelectedCandidate(u)}
-                        className="border-b border-slate-700 hover:bg-slate-700/50 cursor-pointer transition"
-                      >
-                        <td className="p-4 font-bold text-yellow-400">
-                          #{u.rank}
-                        </td>
-                        {/* Name */}
-                        <td className="p-4 font-medium flex items-center gap-2">
-                          {u.name}
-                          {u.rank === 1 && (
-                            <Star
-                              size={16}
-                              className="text-yellow-400 fill-yellow-400"
-                            />
-                          )}
-                        </td>
-
-                        {/* Email */}
-                        <td className="p-4 text-slate-400">{u.email}</td>
-
-                        {/* Submissions */}
-                        <td className="p-4 text-center">{u.total_submissions}</td>
-
-                        {/* Recruiter score */}
-                        <td className="p-4 text-center text-purple-400 font-bold">
-                          {u.rank_score}
-                        </td>
-
-                        {/* Score */}
-                        <td className="p-4 text-center font-semibold">
-                          {u.average_score}
-                        </td>
-
-                        {/* Level */}
-                        <td className="p-4 text-center">
-                          <span
-                            className={`px-3 py-1 text-xs rounded-full ${
-                              u.skill_level === "Advanced"
-                                ? "bg-green-500/20 text-green-400"
-                                : u.skill_level === "Intermediate"
-                                ? "bg-yellow-500/20 text-yellow-400"
-                                : "bg-red-500/20 text-red-400"
-                            }`}
-                          >
-                            {u.skill_level}
-                          </span>
-                        </td>
-
-                        {/* Status */}
-                        <td className="p-4 text-center">
-                          {candidateStatus[u.email] === "shortlisted" && (
-                            <span className="text-green-400 text-sm">Shortlisted</span>
-                          )}
-
-                          {candidateStatus[u.email] === "rejected" && (
-                            <span className="text-red-400 text-sm">Rejected</span>
-                          )}
-                        </td>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[900px] text-left">
+                    <thead className="themed-input subtle text-sm uppercase">
+                      <tr>
+                        <th className="p-4">Rank</th>
+                        <th className="p-4">Name</th>
+                        <th className="p-4">Email</th>
+                        <th className="p-4 text-center">Submissions</th>
+                        <th className="p-4 text-center">Recruiter Score</th>
+                        <th className="p-4 text-center">Avg Score</th>
+                        <th className="p-4 text-center">Level</th>
+                        <th className="p-4 text-center">Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+
+                    <tbody>
+                      {paginatedCandidates.map((u, i) => (
+                        <tr
+                          key={i}
+                          onClick={() => setSelectedCandidate(u)}
+                          className="border-b border-slate-700 hover:bg-white/5 cursor-pointer transition"
+                        >
+                          <td className="p-4 font-bold text-warning">
+                            #{u.rank}
+                          </td>
+                          {/* Name */}
+                          <td className="p-4 font-medium flex items-center gap-2">
+                            {u.name}
+                            {u.rank === 1 && (
+                              <FiStar className="text-warning text-[16px]" />
+                            )}
+                          </td>
+
+                          {/* Email */}
+                          <td className="p-4 subtle">{u.email}</td>
+
+                          {/* Submissions */}
+                          <td className="p-4 text-center">{u.total_submissions}</td>
+
+                          {/* Recruiter score */}
+                          <td className="p-4 text-center text-accent font-bold">
+                            {u.rank_score}
+                          </td>
+
+                          {/* Score */}
+                          <td className="p-4 text-center font-semibold">
+                            {u.average_score}
+                          </td>
+
+                          {/* Level */}
+                          <td className="p-4 text-center">
+                            <span
+                              className={`px-3 py-1 text-xs rounded-full ${
+                                u.skill_level === "Advanced"
+                                  ? "bg-green-500/20 text-success"
+                                  : u.skill_level === "Intermediate"
+                                  ? "bg-yellow-500/20 text-warning"
+                                  : "bg-red-500/20 text-danger"
+                              }`}
+                            >
+                              {u.skill_level}
+                            </span>
+                          </td>
+
+                          {/* Status */}
+                          <td className="p-4 text-center">
+                            {candidateStatus[u.email] === "shortlisted" && (
+                              <span className="text-success text-sm">Shortlisted</span>
+                            )}
+
+                            {candidateStatus[u.email] === "rejected" && (
+                              <span className="text-danger text-sm">Rejected</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
 
                 {totalPages > 1 && (
                   <div className="flex justify-center items-center gap-3 p-4 border-t border-slate-700">
@@ -478,7 +497,7 @@ function RecruiterPage(props) {
                     <button
                       disabled={currentPage === 1}
                       onClick={() => setCurrentPage(currentPage - 1)}
-                      className="px-4 py-2 rounded bg-slate-700 disabled:opacity-40"
+                      className="px-4 py-2 rounded themed-input disabled:opacity-40"
                     >
                       Prev
                     </button>
@@ -493,8 +512,8 @@ function RecruiterPage(props) {
                             onClick={() => setCurrentPage(page)}
                             className={`px-3 py-1 rounded ${
                               currentPage === page
-                                ? "bg-purple-600 text-white"
-                                : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                                ? "btn-primary text-main"
+                                : "themed-input subtle hover:themed-input"
                             }`}
                           >
                             {page}
@@ -506,7 +525,7 @@ function RecruiterPage(props) {
                     <button
                       disabled={currentPage === totalPages}
                       onClick={() => setCurrentPage(currentPage + 1)}
-                      className="px-4 py-2 rounded bg-slate-700 disabled:opacity-40"
+                      className="px-4 py-2 rounded themed-input disabled:opacity-40"
                     >
                       Next
                     </button>
@@ -515,7 +534,7 @@ function RecruiterPage(props) {
                 )}
 
                 {sortedCandidates.length === 0 && (
-                  <p className="text-center text-slate-400 p-6">
+                  <p className="text-center subtle p-6">
                     No candidates found
                   </p>
                 )}
@@ -532,7 +551,7 @@ function RecruiterPage(props) {
                 />
 
                 {/* Drawer */}
-                <div className="fixed top-0 right-0 h-full w-full md:w-[540px] bg-slate-800 z-50 shadow-2xl overflow-y-auto p-6 border-l border-slate-700 transform transition-transform duration-300 translate-x-0">
+                <div className="fixed top-0 right-0 h-full w-full sm:max-w-xl lg:max-w-2xl glass z-50 shadow-2xl overflow-y-auto p-6 border-l border-slate-700 transform transition-transform duration-300 translate-x-0">
 
                   {/* Header */}
                   <div className="mb-6 border-b border-slate-700 pb-4">
@@ -541,20 +560,20 @@ function RecruiterPage(props) {
                     <div className="flex justify-between items-start gap-3">
                       
                       <div className="min-w-0">
-                        <h2 className="text-3xl font-bold text-purple-400 truncate">
+                        <h2 className="text-3xl font-bold text-accent truncate">
                           {selectedCandidate.name}
                         </h2>
 
-                        <p className="text-slate-400 text-sm truncate">
+                        <p className="subtle text-sm truncate">
                           {selectedCandidate.email}
                         </p>
                       </div>
 
                       <button
                         onClick={() => setSelectedCandidate(null)}
-                        className="shrink-0 bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg"
+                        className="shrink-0 themed-input hover:opacity-90 px-3 py-2 rounded-lg"
                       >
-                        ✕
+                        <FiX className="text-[var(--icon)] text-[18px]" />
                       </button>
                     </div>
 
@@ -567,8 +586,8 @@ function RecruiterPage(props) {
                             onClick={() => setDrawerTab(tab)}
                             className={`px-4 py-2 rounded-lg text-sm capitalize whitespace-nowrap transition ${
                               drawerTab === tab
-                                ? "bg-purple-600 text-white"
-                                : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                                ? "btn-primary text-main"
+                                : "themed-input subtle hover:themed-input"
                             }`}
                           >
                             {tab}
@@ -583,23 +602,23 @@ function RecruiterPage(props) {
                     <>
                       {/* Profile */}
                       <div className="grid grid-cols-3 gap-3 mb-6">
-                        <div className="bg-slate-700 p-3 rounded">
-                          <p className="text-xs text-slate-400">Submissions</p>
+                        <div className="themed-input p-3 rounded">
+                          <p className="text-xs subtle">Submissions</p>
                           <p className="font-bold">{selectedCandidate.total_submissions}</p>
                         </div>
 
-                        <div className="bg-slate-700 p-3 rounded">
-                          <p className="text-xs text-slate-400">Avg Score</p>
+                        <div className="themed-input p-3 rounded">
+                          <p className="text-xs subtle">Avg Score</p>
                           <p className="font-bold">{selectedCandidate.average_score}</p>
                         </div>
 
-                        <div className="bg-slate-700 p-3 rounded">
-                          <p className="text-xs text-slate-400">Level</p>
+                        <div className="themed-input p-3 rounded">
+                          <p className="text-xs subtle">Level</p>
                           <p className="font-bold">{selectedCandidate.skill_level}</p>
                         </div>
 
                         <div className="mt-6 w-full col-span-3">
-                          <p className="text-sm text-slate-400 mb-2">
+                          <p className="text-sm subtle mb-2">
                             Recruiter Notes
                           </p>
 
@@ -607,7 +626,7 @@ function RecruiterPage(props) {
                             value={candidateNote}
                             onChange={(e) => setCandidateNote(e.target.value)}
                             rows="4"
-                            className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            className="w-full themed-input border border-[var(--border)] rounded-lg p-3 resize-none"
                           />
 
                           <button
@@ -626,7 +645,7 @@ function RecruiterPage(props) {
                               )
                               toast.success("Note saved")
                             }}
-                            className="mt-3 w-full bg-purple-600 hover:bg-purple-700 py-3 rounded-lg font-semibold"
+                            className="mt-3 w-full btn-primary hover:themed-input py-3 rounded-lg font-semibold"
                           >
                             Save Note
                           </button>
@@ -638,31 +657,38 @@ function RecruiterPage(props) {
                   {drawerTab === "skills" && (
                     <>
                       {/* Skills */}
-                      <h3 className="text-lg text-purple-300 mb-4">
+                      <h3 className="text-lg text-accent mb-4">
                         Skill Breakdown
                       </h3>
 
-                      <div className="bg-slate-800 rounded-xl p-4 h-72">
+                      <div className="glass rounded-xl p-4 h-72">
                         <ResponsiveContainer width="100%" height="100%">
                           <BarChart data={skillChartData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                            <CartesianGrid strokeDasharray="3 3" stroke={chartGrid} />
 
                             <XAxis
                               dataKey="skill"
-                              stroke="#cbd5e1"
+                              stroke={chartAxis}
                             />
 
                             <YAxis
                               domain={[0, 100]}
-                              stroke="#cbd5e1"
+                              stroke={chartAxis}
                             />
 
-                            <Tooltip />
+                            <Tooltip
+                              contentStyle={{
+                                background: chartTooltipBg,
+                                border: "none",
+                                borderRadius: "12px",
+                                color: chartTooltipText
+                              }}
+                            />
 
                             <Bar
                               dataKey="score"
                               radius={[6, 6, 0, 0]}
-                              fill="#a855f7"
+                              fill={chartBar}
                             />
                           </BarChart>
                         </ResponsiveContainer>
@@ -673,31 +699,38 @@ function RecruiterPage(props) {
                   {drawerTab === "submissions" && (
                     <>
                       {/* Submissions */}
-                      <h3 className="text-lg text-purple-300 mb-4">
+                      <h3 className="text-lg text-accent mb-4">
                         Score Trend
                       </h3>
 
-                      <div className="bg-slate-800 rounded-xl p-4 h-72 mb-6">
+                      <div className="glass rounded-xl p-4 h-72 mb-6">
                         <ResponsiveContainer width="100%" height="100%">
                           <LineChart data={trendData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                            <CartesianGrid strokeDasharray="3 3" stroke={chartGrid} />
 
                             <XAxis
                               dataKey="name"
-                              stroke="#cbd5e1"
+                              stroke={chartAxis}
                             />
 
                             <YAxis
                               domain={[0, 100]}
-                              stroke="#cbd5e1"
+                              stroke={chartAxis}
                             />
 
-                            <Tooltip />
+                            <Tooltip
+                              contentStyle={{
+                                background: chartTooltipBg,
+                                border: "none",
+                                borderRadius: "12px",
+                                color: chartTooltipText
+                              }}
+                            />
 
                             <Line
                               type="monotone"
                               dataKey="score"
-                              stroke="#22c55e"
+                              stroke={chartLine}
                               strokeWidth={3}
                               dot={{ r: 5 }}
                             />
@@ -705,14 +738,14 @@ function RecruiterPage(props) {
                         </ResponsiveContainer>
                       </div>
 
-                      <h3 className="text-lg text-purple-300 mb-3">
+                      <h3 className="text-lg text-accent mb-3">
                         Submission History
                       </h3>
 
                       {loadingDetails ? (
-                        <p className="text-slate-400">Loading...</p>
+                        <p className="subtle">Loading candidate data...</p>
                       ) : candidateSubmissions.length === 0 ? (
-                        <p className="text-slate-400">No submissions found</p>
+                        <p className="subtle">No submissions found</p>
                       ) : (
                         <div className="space-y-3 mb-6">
                           {candidateSubmissions.map((s, i) => (
@@ -729,13 +762,13 @@ function RecruiterPage(props) {
                                 setSubmissionDetail(res.data)
                                 setSelectedSubmission(s)
                               }}
-                              className="bg-slate-700 p-3 rounded cursor-pointer hover:bg-slate-600 transition"
+                              className="glass p-3 rounded cursor-pointer hover:themed-input transition"
                             >
                               <p className="font-medium">{s.task_id}</p>
-                              <p className="text-sm text-slate-300">
+                              <p className="text-sm subtle">
                                 Score: {s.score}
                               </p>
-                              <p className="text-xs text-slate-400">
+                              <p className="text-xs subtle">
                                 {s.date}
                               </p>
                             </div>
@@ -754,7 +787,7 @@ function RecruiterPage(props) {
                         Download {selectedCandidate.name}'s Report
                       </button>
 
-                      <p className="text-sm text-slate-400 mt-2">
+                      <p className="text-sm subtle mt-2">
                         Export this candidate's submission data.
                       </p>
                     </div>
@@ -785,12 +818,17 @@ function RecruiterPage(props) {
                       }}
                       className={`w-full py-3 rounded-lg font-semibold transition ${
                         candidateStatus[selectedCandidate.email] === "shortlisted"
-                          ? "bg-green-500 text-white"
-                          : "bg-slate-700 hover:bg-green-600"
+                          ? "bg-green-500 text-main"
+                          : "themed-input hover:bg-green-600"
                       }`}
                     >
                       {candidateStatus[selectedCandidate.email] === "shortlisted"
-                        ? "✓ Shortlisted"
+                        ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <FiCheckCircle />
+                            Shortlisted
+                          </span>
+                        )
                         : "Shortlist"}
                     </button>
 
@@ -817,12 +855,17 @@ function RecruiterPage(props) {
                       }}
                       className={`w-full py-3 rounded-lg font-semibold transition ${
                         candidateStatus[selectedCandidate.email] === "rejected"
-                          ? "bg-red-500 text-white"
-                          : "bg-slate-700 hover:bg-red-600"
+                          ? "bg-red-500 text-main"
+                          : "themed-input hover:bg-red-600"
                       }`}
                     >
                       {candidateStatus[selectedCandidate.email] === "rejected"
-                        ? "✕ Rejected"
+                        ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <FiXCircle />
+                            Rejected
+                          </span>
+                        )
                         : "Reject"}
                     </button>
                   </div>
@@ -833,19 +876,19 @@ function RecruiterPage(props) {
         )}
 
         {view === "plagiarism" && (
-          <div className="bg-slate-800 rounded-xl p-6 shadow-lg">
+          <div className="glass rounded-xl p-6 shadow-lg">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-red-400">
+              <h2 className="text-2xl font-bold text-danger">
                 Plagiarism Alerts
               </h2>
 
-              <span className="text-sm text-slate-400">
+              <span className="text-sm subtle">
                 {plagiarismData.length} flagged pair(s)
               </span>
             </div>
 
             {plagiarismData.length === 0 ? (
-              <p className="text-slate-400">
+              <p className="subtle">
                 No suspicious submissions found.
               </p>
             ) : (
@@ -853,22 +896,22 @@ function RecruiterPage(props) {
                 {plagiarismData.map((p, i) => (
                   <div
                     key={i}
-                    className="bg-slate-700 p-5 rounded-xl border-l-4 border-red-400 hover:bg-slate-700/80 transition"
+                    className="themed-input p-5 rounded-xl border-l-4 border-red-400 hover:themed-input/80 transition"
                   >
                     {/* Task */}
-                    <p className="font-semibold text-white text-lg">
+                    <p className="font-semibold text-main text-lg">
                       {p.task_id}
                     </p>
 
                     {/* Users */}
                     <div className="mt-2">
-                      <p className="text-slate-200 font-medium">
+                      <p className="subtle font-medium">
                         {p.user1_name || `User ${p.user1}`} ↔{" "}
                         {p.user2_name || `User ${p.user2}`}
                       </p>
 
                       {(p.user1_email || p.user2_email) && (
-                        <p className="text-xs text-slate-400 mt-1">
+                        <p className="text-xs subtle mt-1">
                           {p.user1_email} • {p.user2_email}
                         </p>
                       )}
@@ -876,11 +919,11 @@ function RecruiterPage(props) {
 
                     {/* Stats */}
                     <div className="mt-3 flex flex-wrap gap-3">
-                      <span className="bg-red-500/20 text-red-300 px-3 py-1 rounded-full text-sm font-semibold">
+                      <span className="bg-red-500/20 text-danger px-3 py-1 rounded-full text-sm font-semibold">
                         Similarity: {p.similarity}%
                       </span>
 
-                      <span className="bg-slate-600 text-slate-200 px-3 py-1 rounded-full text-sm">
+                      <span className="themed-input subtle px-3 py-1 rounded-full text-sm">
                         {p.language?.toUpperCase()}
                       </span>
                     </div>
@@ -900,48 +943,48 @@ function RecruiterPage(props) {
           />
 
           <div className="fixed inset-0 flex items-center justify-center z-[80] p-6">
-            <div className="bg-slate-800 w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl p-6 shadow-2xl">
+            <div className="glass w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl p-6 shadow-2xl">
 
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-purple-400">
+                <h2 className="text-2xl font-bold text-accent">
                   {submissionDetail.task_id}
                 </h2>
 
                 <button
                   onClick={() => setSelectedSubmission(null)}
-                  className="bg-slate-700 px-3 py-2 rounded"
+                  className="shrink-0 themed-input hover:opacity-90 px-3 py-2 rounded-lg flex items-center justify-center"
                 >
-                  ✕
+                  <FiX className="text-[var(--icon)] text-[18px]" />
                 </button>
               </div>
 
-              <div className="grid grid-cols-4 gap-4 mb-6">
-                <div className="bg-slate-700 p-3 rounded">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="themed-input p-3 rounded">
                   Score: {submissionDetail.score}
                 </div>
 
-                <div className="bg-slate-700 p-3 rounded">
+                <div className="themed-input p-3 rounded">
                   Exec: {submissionDetail.execution_score}
                 </div>
 
-                <div className="bg-slate-700 p-3 rounded">
+                <div className="themed-input p-3 rounded">
                   Quality: {submissionDetail.quality_score}
                 </div>
 
-                <div className="bg-slate-700 p-3 rounded">
+                <div className="themed-input p-3 rounded">
                   Time: {submissionDetail.time_score}
                 </div>
               </div>
 
-              <p className="mb-3 text-slate-400">
+              <p className="mb-3 subtle font-semibold">
                 Language: {submissionDetail.language}
               </p>
 
-              <pre className="bg-slate-900 p-4 rounded-lg overflow-x-auto text-sm mb-6">
-      {submissionDetail.code}
+              <pre className="glass p-4 rounded-lg overflow-x-auto text-sm mb-6">
+                {submissionDetail.code}
               </pre>
 
-              <h3 className="text-lg text-purple-300 mb-3">
+              <h3 className="text-lg text-accent font-semibold mb-3">
                 Test Case Results
               </h3>
 
@@ -949,7 +992,7 @@ function RecruiterPage(props) {
                 {submissionDetail.details.map((t, i) => (
                   <div
                     key={i}
-                    className="bg-slate-700 p-3 rounded"
+                    className="themed-input p-3 rounded"
                   >
                     <p>Case {i + 1}</p>
                     <p>Status: {t.status}</p>
