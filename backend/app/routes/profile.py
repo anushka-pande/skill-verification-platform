@@ -72,6 +72,8 @@ def get_profile(user_id: int):
       "rank": "-",
       "streak_days": 0,
 
+      "skills": user.skills if user else None,
+
       "tasks_created": tasks_created,
       "candidates_assessed": candidates_assessed,
       "avg_candidate_score": avg_candidate_score,
@@ -212,6 +214,7 @@ def get_profile(user_id: int):
     "skill_breakdown": skill_breakdown,
     "recent_activity": recent_activity,
     "rank": rank,
+    "skills": user.skills if user else None,
     "streak_days": streak,
     "tasks_created": tasks_created,
     "candidates_assessed": candidates_assessed,
