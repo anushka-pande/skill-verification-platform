@@ -276,3 +276,32 @@ body {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
 }
+
+/* BADGE SYSTEM */
+
+.badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* WARNING */
+.badge-warning {
+  background: rgba(250, 204, 21, 0.15);
+  color: var(--warning);
+  border: 1px solid rgba(250, 204, 21, 0.25);
+}
+
+/* INFO */
+.badge-info {
+  background: rgba(59, 130, 246, 0.15);
+  color: #2563eb;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+/* ACCENT */
+.badge-accent {
+  background: linear-gradient(to right, var(--accent), var(--accent-2));
+  color: white;
+}

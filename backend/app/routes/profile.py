@@ -1,6 +1,8 @@
 from fastapi import APIRouter
 from app.mongo import submissions_collection, tasks_collection
 from datetime import datetime
+from app.models import User
+from app.database import SessionLocal
 
 router = APIRouter()
 
@@ -13,6 +15,44 @@ def get_skill_level(avg_score):
 
 @router.get("/profile/{user_id}")
 def get_profile(user_id: int):
+  db = SessionLocal()
+  user = db.query(User).filter(User.id == user_id).first()
+
+  # RECRUITER ANALYTICS
+
+  tasks = list(tasks_collection.find({
+    "created_by": {"$in": [user_id, str(user_id)]}
+  }))
+
+  tasks_created = len(tasks)
+  
+  task_titles = [t["title"].strip().lower() for t in tasks]
+  
+  all_submissions = list(submissions_collection.find({}))
+
+  submissions_for_tasks = [
+    s for s in all_submissions
+    if s.get("task_id", "").strip().lower() in task_titles
+  ]
+
+  # unique candidates
+  candidate_ids = set(
+      s.get("user_id") for s in submissions_for_tasks
+  )
+  candidates_assessed = len(candidate_ids)
+
+  # average score
+  scores = [
+      s.get("final_score")
+      for s in submissions_for_tasks
+      if s.get("final_score") is not None
+  ]
+
+  avg_candidate_score = (
+      round(sum(scores) / len(scores), 2)
+      if scores else 0
+  )
+
   submissions = list(
     submissions_collection.find({"user_id": user_id})
   )
@@ -20,6 +60,7 @@ def get_profile(user_id: int):
   total = len(submissions)
 
   if total == 0:
+    db.close()
     return {
       "total_submissions": 0,
       "average_score": 0,
@@ -29,7 +70,16 @@ def get_profile(user_id: int):
       "skill_breakdown": [],
       "recent_activity": [],
       "rank": "-",
-      "streak_days": 0
+      "streak_days": 0,
+
+      "tasks_created": tasks_created,
+      "candidates_assessed": candidates_assessed,
+      "avg_candidate_score": avg_candidate_score,
+
+      "company_name": user.company_name if user else None,
+      "company_domain": user.company_domain if user else None,
+      "company_location": user.company_location if user else None,
+      "recruiter_role": user.recruiter_role if user else None,
     }
 
   # Scores
@@ -162,5 +212,12 @@ def get_profile(user_id: int):
     "skill_breakdown": skill_breakdown,
     "recent_activity": recent_activity,
     "rank": rank,
-    "streak_days": streak
+    "streak_days": streak,
+    "tasks_created": tasks_created,
+    "candidates_assessed": candidates_assessed,
+    "avg_candidate_score": avg_candidate_score,
+    "company_name": user.company_name if user else None,
+    "company_domain": user.company_domain if user else None,
+    "company_location": user.company_location if user else None,
+    "recruiter_role": user.recruiter_role if user else None,
   }

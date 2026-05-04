@@ -192,3 +192,23 @@ def change_password(data: dict, db: Session = Depends(get_db)):
   db.commit()
 
   return {"message": "Password updated successfully"}
+
+@router.post("/complete-profile")
+def complete_profile(data: dict, db: Session = Depends(get_db)):
+  user = db.query(User).filter(User.id == data["user_id"]).first()
+
+  if not user:
+    raise HTTPException(status_code=404, detail="User not found")
+
+  if user.role == "candidate":
+    user.skills = data.get("skills")
+
+  elif user.role == "recruiter":
+    user.company_name = data.get("company_name")
+    user.company_domain = data.get("company_domain")
+    user.company_location = data.get("company_location")
+    user.recruiter_role = data.get("recruiter_role")
+
+  db.commit()
+
+  return {"message": "Profile updated"}

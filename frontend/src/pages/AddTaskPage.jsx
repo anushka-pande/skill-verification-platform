@@ -26,8 +26,8 @@ function AddTaskPage(props) {
     setExecutionTimeLimit,
     solveTimeLimit,
     setSolveTimeLimit,
-    difficulty,
-    setDifficulty,
+    taskDifficulty,
+    setTaskDifficulty,
     constraints,
     setConstraints,
     outputFormat,
@@ -95,13 +95,14 @@ function AddTaskPage(props) {
               <FiLayers className="absolute left-4 top-1/2 -translate-y-1/2 subtle text-lg z-10" />
 
               <select
-                value={difficulty}
-                onChange={(e) => setDifficulty(e.target.value)}
+                value={taskDifficulty}
+                onChange={(e) => setTaskDifficulty(e.target.value)}
                 className="themed-input w-full pl-12 p-3"
               >
-                <option>Easy</option>
-                <option>Medium</option>
-                <option>Hard</option>
+                <option value="">Select Difficulty</option>
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
               </select>
             </div>
 
@@ -190,7 +191,8 @@ function AddTaskPage(props) {
             {examples.map((ex, index) => (
               <div key={index} className="glass p-4 rounded-xl mb-4 space-y-3">
 
-                <input
+                <textarea
+                  rows="4"
                   placeholder="Example Input"
                   value={ex.input}
                   className="w-full p-3 themed-input rounded-xl"
@@ -201,7 +203,8 @@ function AddTaskPage(props) {
                   }}
                 />
 
-                <input
+                <textarea
+                  rows="3"
                   placeholder="Expected Output"
                   value={ex.output}
                   className="w-full p-3 themed-input rounded-xl"
@@ -342,15 +345,16 @@ function AddTaskPage(props) {
             <button
               onClick={async () => {
                 try {
-                  if (!difficulty) {
+                  if (!["Easy", "Medium", "Hard"].includes(taskDifficulty)) {
                     toast.error("Please select difficulty")
                     return
                   }
 
                   await axios.post("http://127.0.0.1:8000/tasks", {
+                    user_id: sessionStorage.getItem("user_id"), 
                     title,
                     description,
-                    difficulty,
+                    difficulty: taskDifficulty,
                     skill,
                     execution_time_limit: executionTimeLimit,
                     solve_time_limit: solveTimeLimit,
@@ -372,7 +376,7 @@ function AddTaskPage(props) {
                   setSkill("")
                   setExecutionTimeLimit(1)
                   setSolveTimeLimit(20)
-                  setDifficulty("")
+                  setTaskDifficulty("")
                   setPublicCases([{ input: "", output: "" }])
                   setHiddenCases([{ input: "", output: "" }])
                   setConstraints("")

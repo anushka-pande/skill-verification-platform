@@ -13,6 +13,7 @@ import SubmissionsPage from "./pages/SubmissionsPage"
 import AddTaskPage from "./pages/AddTaskPage"
 import RecruiterPage from "./pages/RecruiterPage"
 import ChooseRole from "./pages/chooseRole"
+import CompleteProfile from "./pages/CompleteProfile"
 import SettingsPage from "./pages/SettingsPage"
 import TaskPreview from "./pages/TaskPreview"
 
@@ -35,7 +36,7 @@ function App() {
   const [aiData, setAiData] = useState(null)
   const [aiLoading, setAiLoading] = useState(false)
 
-  const [difficulty, setDifficulty] = useState("All")
+  const [filteredDifficulty, setFilteredDifficulty] = useState("All")
   const [code, setCode] = useState("")
   const [result, setResult] = useState(null)
   const [language, setLanguage] = useState(
@@ -48,6 +49,7 @@ function App() {
   const [sortType, setSortType] = useState("latest")
 
   const [title, setTitle] = useState("")
+  const [taskDifficulty, setTaskDifficulty] = useState("")
   const [description, setDescription] = useState("")
   const [skill, setSkill] = useState("")
   const [constraints, setConstraints] = useState("")
@@ -110,10 +112,28 @@ function App() {
         // redirect
         if(res.data.role) {
           sessionStorage.setItem("role", res.data.role)
-          if (res.data.role === "recruiter") {
-            setPage("recruiter")
-          } else {
-            setPage("dashboard")
+          
+          const profileRes = await axios.get(
+            `http://127.0.0.1:8000/profile/${res.data.user_id}`
+          )
+
+          const profile = profileRes.data
+
+          if(res.data.role === "recruiter") {
+            if(!profile.company_name) {
+              setPage("complete-profile")
+            }
+            else {
+              setPage("recruiter")
+            }
+          }
+          else {
+            if(!profile.skills) {
+              setPage("complete-profile")
+            }
+            else {
+              setPage("dashboard")
+            }
           }
         }
         else {
@@ -150,9 +170,9 @@ function App() {
     if (page === "dashboard") {
 
       const url =
-        difficulty === "All"
+        filteredDifficulty === "All"
           ? "http://127.0.0.1:8000/tasks"
-          : `http://127.0.0.1:8000/tasks?difficulty=${difficulty}`
+          : `http://127.0.0.1:8000/tasks?diffculty=${filteredDifficulty}`
 
       const userId = sessionStorage.getItem("user_id")
 
@@ -171,7 +191,7 @@ function App() {
       .catch(err => console.error(err))
       .finally(() => setAiLoading(false))
     }
-  }, [page, difficulty])
+  }, [page, filteredDifficulty])
 
   useEffect(() => {
     if (page === "submissions") {
@@ -251,8 +271,8 @@ function App() {
           tasks={tasks}
           setPage={setPage}
           setSelectedTask={setSelectedTask}
-          difficulty={difficulty}
-          setDifficulty={setDifficulty}
+          difficulty={filteredDifficulty}
+          setDifficulty={setFilteredDifficulty}
           isAdmin={isAdmin}
           profileOpen={profileOpen}
           setProfileOpen={setProfileOpen}
@@ -298,7 +318,7 @@ function App() {
         />
       )}
 
-      {page === "add-task" && isAdmin && (
+      {page === "add-task" && role === 'recruiter' && (
         <AddTaskPage
           setPage={setPage}
 
@@ -329,8 +349,8 @@ function App() {
           solveTimeLimit={solveTimeLimit}
           setSolveTimeLimit={setSolveTimeLimit}
 
-          difficulty={difficulty}
-          setDifficulty={setDifficulty}
+          taskDifficulty={taskDifficulty}
+          setTaskDifficulty={setTaskDifficulty}
 
           publicCases={publicCases}
           setPublicCases={setPublicCases}
@@ -361,6 +381,10 @@ function App() {
 
       {page === "choose-role" && (
         <ChooseRole setPage={setPage} />
+      )}
+
+      {page === "complete-profile" && (
+        <CompleteProfile setPage={setPage} />
       )}
 
       {page === "settings" && (

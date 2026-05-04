@@ -353,7 +353,10 @@ def get_note(email: str, user=Depends(verify_recruiter)):
 
 
 @router.post("/recruiter/email-shortlisted")
-def email_shortlisted(user=Depends(verify_recruiter)):
+def email_shortlisted(
+  db: Session = Depends(get_db),  
+  user=Depends(verify_recruiter)
+):
   try:
     shortlisted = list(
       recruiter_status_collection.find(
@@ -364,9 +367,26 @@ def email_shortlisted(user=Depends(verify_recruiter)):
     for c in shortlisted:
       email = c["candidate_email"]
 
-      msg = MIMEText(
-          "Congratulations! You have been shortlisted."
-      )
+      recruiter_user = db.query(User).filter(User.id == user["user_id"]).first()
+
+      company = recruiter_user.company_name or "a company"
+      role = recruiter_user.recruiter_role or "a role"
+      domain = recruiter_user.company_domain or "Tech"
+
+      body = f"""
+      Congratulations!
+
+      You have been shortlisted by {company}.
+
+      Role: {role}
+      Domain: {domain}
+
+      We will reach out to you with further steps.
+
+      Best of luck!
+      """
+
+      msg = MIMEText(body)
 
       msg["Subject"] = "Shortlisted"
       msg["From"] = "anushkapande04@gmail.com"

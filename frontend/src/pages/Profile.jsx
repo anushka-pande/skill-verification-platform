@@ -14,6 +14,14 @@ function ProfilePage(props) {
   const { setPage } = props
 
   const [profileData, setProfileData] = useState(null)
+  const [editMode, setEditMode] = useState(false)
+  const [form, setForm] = useState({
+    skills: "",
+    company_name: "",
+    company_domain: "",
+    company_location: "",
+    recruiter_role: ""
+  })
 
   const email = sessionStorage.getItem("user_email")
   const role = sessionStorage.getItem("role")
@@ -24,7 +32,17 @@ function ProfilePage(props) {
   useEffect(() => {
     axios
       .get(`http://127.0.0.1:8000/profile/${userId}`)
-      .then((res) => setProfileData(res.data))
+      .then((res) => {
+        setProfileData(res.data)
+
+        setForm({
+          skills: res.data.skills || "",
+          company_name: res.data.company_name || "",
+          company_domain: res.data.company_domain || "",
+          company_location: res.data.company_location || "",
+          recruiter_role: res.data.recruiter_role || ""
+        })
+      })
       .catch((err) => {
         console.error(err)
         toast.error("Failed to load profile")
@@ -183,24 +201,85 @@ function ProfilePage(props) {
                 {profileData.best_score === 100 && (
                   <Badge
                     text="Perfect Score"
-                    classes="bg-yellow-100 text-warning"
+                    classes="badge badge-warning"
                   />
                 )}
 
                 {profileData.total_submissions >= 5 && (
                   <Badge
                     text="5+ Attempts"
-                    classes="bg-blue-100 text-accent"
+                    classes="badge badge-info"
                   />
                 )}
 
                 {profileData.skill_level === "Advanced" && (
                   <Badge
                     text="Advanced Coder"
-                    classes="bg-accent text-accent"
+                    classes="badge badge-accent"
                   />
                 )}
               </div>
+            )}
+          </Section>
+
+          {/* SKILLS */}
+          <Section title="Profile Details">
+            <div className="flex justify-between items-center mb-3">
+              <p className="subtle text-sm">Manage your details</p>
+              <button
+                onClick={() => setEditMode(!editMode)}
+                className="text-accent text-sm"
+              >
+                {editMode ? "Cancel" : "Edit"}
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <p className="subtle text-sm">Skills</p>
+                {editMode ? (
+                  <input
+                    value={form.skills}
+                    onChange={(e) =>
+                      setForm({ ...form, skills: e.target.value })
+                    }
+                    className="themed-input w-full p-2"
+                  />
+                ) : (
+                  <p className="font-medium">
+                    {profileData.skills || "Not added"}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {editMode && (
+              <button
+                onClick={async () => {
+                  try {
+                    await axios.post("http://127.0.0.1:8000/complete-profile", {
+                      user_id: sessionStorage.getItem("user_id"),
+                      ...form
+                    })
+
+                    toast.success("Profile updated")
+
+                    setEditMode(false)
+
+                    // update UI instantly
+                    setProfileData({
+                      ...profileData,
+                      ...form
+                    })
+
+                  } catch (err) {
+                    toast.error("Failed to update")
+                  }
+                }}
+                className="btn-primary w-full mt-4 p-2 rounded"
+              >
+                Save Changes
+              </button>
             )}
           </Section>
         </>
@@ -236,6 +315,109 @@ function ProfilePage(props) {
               shortlist top performers, and strengthen hiring quality using
               data-driven evaluations.
             </p>
+          </Section>
+
+          {/* Recruiter's Company details */}
+          <Section title="Company Details">
+            <div className="flex justify-between items-center mb-3">
+              <p className="subtle text-sm">Manage company details</p>
+
+              <button
+                onClick={() => setEditMode(!editMode)}
+                className="text-accent text-sm"
+              >
+                {editMode ? "Cancel" : "Edit"}
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <p className="subtle text-sm">Company</p>
+                {editMode ? (
+                  <input
+                    value={form.company_name}
+                    onChange={(e) =>
+                      setForm({ ...form, company_name: e.target.value })
+                    }
+                    className="themed-input w-full p-2"
+                  />
+                ) : (
+                  <p>{profileData.company_name || "Not added"}</p>
+                )}
+              </div>
+
+              <div>
+                <p className="subtle text-sm">Domain</p>
+                {editMode ? (
+                  <input
+                    value={form.company_domain}
+                    onChange={(e) =>
+                      setForm({ ...form, company_domain: e.target.value })
+                    }
+                    className="themed-input w-full p-2"
+                  />
+                ) : (
+                  <p>{profileData.company_domain || "Not added"}</p>
+                )}
+              </div>
+
+              <div>
+                <p className="subtle text-sm">Location</p>
+                {editMode ? (
+                  <input
+                    value={form.company_location}
+                    onChange={(e) =>
+                      setForm({ ...form, company_location: e.target.value })
+                    }
+                    className="themed-input w-full p-2"
+                  />
+                ) : (
+                  <p>{profileData.company_location || "Not added"}</p>
+                )}
+              </div>
+
+              <div>
+                <p className="subtle text-sm">Role</p>
+                {editMode ? (
+                  <input
+                    value={form.recruiter_role}
+                    onChange={(e) =>
+                      setForm({ ...form, recruiter_role: e.target.value })
+                    }
+                    className="themed-input w-full p-2"
+                  />
+                ) : (
+                  <p>{profileData.recruiter_role || "Not added"}</p>
+                )}
+              </div>
+            </div>
+
+            {editMode && (
+              <button
+                onClick={async () => {
+                  try {
+                    await axios.post("http://127.0.0.1:8000/complete-profile", {
+                      user_id: sessionStorage.getItem("user_id"),
+                      ...form
+                    })
+
+                    toast.success("Profile updated")
+                    setEditMode(false)
+
+                    setProfileData({
+                      ...profileData,
+                      ...form
+                    })
+
+                  } catch (err) {
+                    toast.error("Failed to update")
+                  }
+                }}
+                className="btn-primary w-full mt-4 p-2 rounded"
+              >
+                Save Changes
+              </button>
+            )}
           </Section>
 
           {/* Recruiter Activity */}

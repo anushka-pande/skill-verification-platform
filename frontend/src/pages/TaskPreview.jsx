@@ -133,19 +133,15 @@ function TaskPreview(props) {
                         Example {i + 1}
                       </p>
 
-                      <p className="subtle">
-                        <span className="font-semibold text-main">
-                          Input:
-                        </span>{" "}
-                        {ex.input}
-                      </p>
-
-                      <p className="subtle mt-2">
-                        <span className="font-semibold text-main">
-                          Output:
-                        </span>{" "}
-                        {ex.output}
-                      </p>
+                      <div className="subtle mt-2">
+                        <span className="font-semibold text-main">Input:</span>
+                        <pre className="mt-1 whitespace-pre-wrap">{ex.input}</pre>
+                      </div>
+                    
+                      <div className="subtle mt-2">
+                        <span className="font-semibold text-main">Output:</span>
+                        <pre className="mt-1 whitespace-pre-wrap">{ex.output}</pre>
+                      </div>
 
                       {ex.explanation && (
                         <p className="subtle mt-2">

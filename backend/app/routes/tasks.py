@@ -5,9 +5,12 @@ router = APIRouter()
 
 @router.post("/tasks")
 def create_task(task: dict):
+  if not task.get("user_id"):
+    raise HTTPException(status_code=400, detail="user_id is required")
   # task structure
   new_task = {
     "title": task.get("title"),
+    "created_by": int(task.get("user_id")),
     "description": task.get("description", ""),
     "difficulty": task.get("difficulty"),
     "skill": task.get("skill"),

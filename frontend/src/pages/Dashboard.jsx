@@ -34,9 +34,16 @@ function Dashboard(props) {
     setAiLoading
   } = props
 
-  const filteredTasks = tasks.filter(task =>
-    task.title.toLowerCase().includes(search.toLowerCase())
-  )
+  const filteredTasks = tasks.filter(task => {
+    const matchesSearch = task.title
+      .toLowerCase()
+      .includes(search.toLowerCase())
+
+    const matchesDifficulty =
+      difficulty === "All" || task.difficulty === difficulty
+
+    return matchesSearch && matchesDifficulty
+  })
 
   return (
     <>
@@ -211,7 +218,7 @@ function Dashboard(props) {
           ))}
         </div>
 
-        {tasks.length === 0 && (
+        {filteredTasks.length === 0 && (
           <div className="col-span-full glass rounded-2xl p-10 text-center subtle">
             No tasks found for selected difficulty.
           </div>

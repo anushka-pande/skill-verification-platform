@@ -16,11 +16,7 @@ function ChooseRole({ setPage }) {
 
       toast.success(`Logged in as ${role}`)
 
-      if (role === "recruiter") {
-        setPage("recruiter")
-      } else {
-        setPage("dashboard")
-      }
+      setPage("complete-profile")
 
     } catch (err) {
       toast.error("Failed to set role")

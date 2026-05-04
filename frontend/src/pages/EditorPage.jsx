@@ -160,15 +160,15 @@ function EditorPage(props) {
                       Example {i + 1}
                     </p>
 
-                    <p className="subtle">
-                      <span className="font-semibold text-main">Input:</span>{" "}
-                      {ex.input}
-                    </p>
+                    <div className="subtle mt-2">
+                      <span className="font-semibold text-main">Input:</span>
+                      <pre className="mt-1 whitespace-pre-wrap">{ex.input}</pre>
+                    </div>
 
-                    <p className="subtle mt-2">
-                      <span className="font-semibold text-main">Output:</span>{" "}
-                      {ex.output}
-                    </p>
+                    <div className="subtle mt-2">
+                      <span className="font-semibold text-main">Output:</span>
+                      <pre className="mt-1 whitespace-pre-wrap">{ex.output}</pre>
+                    </div>
 
                     {ex.explanation && (
                       <p className="subtle mt-2">
@@ -397,7 +397,10 @@ function EditorPage(props) {
                   </p>
                 ) : (
                   <>
-                    <p><strong>Input:</strong> {d.input}</p>
+                    <div>
+                      <strong>Input:</strong>
+                      <pre className="mt-1 whitespace-pre-wrap">{d.input}</pre>
+                    </div>
                     <p><strong>Expected:</strong> {d.expected}</p>
 
                     {d.error ? (
