@@ -1,8 +1,18 @@
 # Environment files
 .env
 *.env
+!.env.example
 
-# Node modules (if using Node.js)
+# Python virtual environments
+skill-env/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Node modules
 node_modules/
 
 # Build folders
